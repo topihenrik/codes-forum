@@ -1,0 +1,9 @@
+# flyctl launch added from .gitignore
+**\node_modules
+**\build
+**\.env*
+**\__generated__
+
+# cypress
+**\videos
+**\screenshots

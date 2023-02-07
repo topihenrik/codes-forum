@@ -1,0 +1,73 @@
+name: Deployment Pipeline
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+jobs:
+  tests:
+    name: Run linter and E2E tests
+    runs-on: ubuntu-20.04
+    services:
+      mongo:
+        image: mongo
+        env:
+          MONGO_INITDB_DATABASE: devops-test
+        ports:
+          - 27017:27017
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      - name: install backend
+        run: npm install --prefix backend
+      - name: install frontend
+        run: npm install --prefix frontend
+      - name: lint backend
+        run: npm run lint --prefix backend
+      - name: lint frontend
+        run: npm run lint --prefix frontend
+      - name: build backend
+        run: npm run build --prefix backend
+      - name: build frontend
+        run: npm run build --prefix frontend
+      - name: e2e test
+        uses: cypress-io/github-action@v2
+        with:
+          command: npm run test
+          start: | 
+            npm run start:e2e --prefix ../backend
+            npm run start -- --host
+          working-directory: frontend
+          wait-on: http://localhost:4173/
+  deploy:
+    name: Deploy application
+    needs: [tests]
+    if: ${{ (github.event_name == 'push') && (!contains(toJson(github.event.commits.*.message), '#skip')) }}
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --local-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+  tag_release:
+    permissions: write-all
+    name: Tag release
+    needs: [deploy]
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: '0'
+    - name: Bump version and push tag
+      uses: anothrNick/github-tag-action@1.55.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DEFAULT_BUMP: patch
+        WITH_V: true
