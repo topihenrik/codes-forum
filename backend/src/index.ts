@@ -8,9 +8,6 @@ import cors from "cors";
 import morgan from "morgan";
 import { resolvers } from "./graphql/resolvers.js";
 import typeDefs from "./graphql/schema.js";
-//import { readFileSync } from "fs";
-//const typeDefs = readFileSync("./src/schema.graphql", { encoding: "utf-8" });
-
 
 import "./mongodb.js";
 

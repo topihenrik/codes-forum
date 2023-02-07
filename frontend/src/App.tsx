@@ -5,6 +5,7 @@ import { gql } from "./__generated__/gql";
 const GET_BOOKS = gql(/* GraphQL */`
     query GetBooks{
         books {
+            _id
             title
             author
         }

@@ -3,8 +3,8 @@ import mongoose from "mongoose";
 const mongoURI = process.env.NODE_ENV === "production" 
     ? process.env.DB_URI                            // production
     : process.env.NODE_ENV === "development"
-        ? "mongodb://127.0.0.1:27017/devops-dev"    // development
-        : "mongodb://127.0.0.1:27017/devops-test";  // test
+        ? "mongodb://127.0.0.1:27017/dev-codes-forum"    // development
+        : "mongodb://127.0.0.1:27017/test-codes-forum";  // test
 
 try {
     mongoose.set("strictQuery", true);

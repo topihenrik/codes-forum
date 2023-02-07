@@ -4,12 +4,13 @@ const typeDefs = gql`
     scalar Date
 
     type Book {
+        _id: ID
         title: String
         author: String
     }
-
+    
     type User {
-        id: ID!
+        id: ID
         username: String
         password: String
         bio: String
@@ -19,7 +20,7 @@ const typeDefs = gql`
     }
 
     type Post {
-        id: ID!
+        id: ID
         title: String
         code: String
         message: String
@@ -31,7 +32,7 @@ const typeDefs = gql`
     }
 
     type Comment {
-        id: ID!
+        id: ID
         body: String
         author: User
         likes: [User]
@@ -40,8 +41,24 @@ const typeDefs = gql`
         updatedAt: Date
     }
 
+    type Token {
+        value: String!
+    }
+
     type Query {
         books: [Book!]!
+    }
+
+    type Mutation {
+        createUser(
+            username: String!
+            password: String!
+            password_confirm: String!
+        ): User
+        login(
+            username: String!
+            password: String!
+        ): Token
     }
 `
 

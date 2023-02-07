@@ -17,7 +17,14 @@ const initBooks = [
         title: "One Thousand Cthulhu Attacks",
         author: "James McMillan"
     }
-]
+];
+
+/* const initPosts = [
+    {
+        title: "Help with code!",
+        code: "<h1>Hello World<h1>"
+    }
+] */
 
 const initializeForTests = async () => {
     try {
