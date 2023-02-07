@@ -1,0 +1,23 @@
+import { Schema, model } from "mongoose";
+
+interface IUser {
+    username: string,
+    password: string,
+    bio: string,
+    admin: boolean,
+    createdAt: Date,
+    updatedAt: Date
+}
+
+const UserSchema = new Schema<IUser>(
+    {
+        username: { type: String, required: true },
+        password: { type: String, required: true  },
+        bio: { type: String },
+        admin: { type: Boolean, default: false },
+        createdAt: { type: Date },
+        updatedAt: { type: Date }
+    }
+);
+
+export default model<IUser>("User", UserSchema);

@@ -6,9 +6,11 @@ import express from "express";
 import http from "http";
 import cors from "cors";
 import morgan from "morgan";
-import { resolvers } from "./resolvers.js";
-import { readFileSync } from "fs";
-const typeDefs = readFileSync("./src/schema.graphql", { encoding: "utf-8" });
+import { resolvers } from "./graphql/resolvers.js";
+import typeDefs from "./graphql/schema.js";
+//import { readFileSync } from "fs";
+//const typeDefs = readFileSync("./src/schema.graphql", { encoding: "utf-8" });
+
 
 import "./mongodb.js";
 
