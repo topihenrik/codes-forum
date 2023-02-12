@@ -12,11 +12,6 @@ const typeDefs = gql`
     type User {
         id: ID
         username: String
-        password: String
-        bio: String
-        admin: Boolean
-        createdAt: Date
-        updatedAt: Date
     }
 
     type Post {

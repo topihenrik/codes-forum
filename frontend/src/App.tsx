@@ -1,6 +1,5 @@
-import './App.css'
-import { useQuery } from "@apollo/client";
-import { gql } from "./__generated__/gql";
+import { useQuery } from '@apollo/client';
+import { gql } from './__generated__/gql';
 
 const GET_BOOKS = gql(/* GraphQL */`
     query GetBooks{
@@ -13,18 +12,31 @@ const GET_BOOKS = gql(/* GraphQL */`
 `);
 
 function App() {
-    const { loading, error, data } = useQuery(GET_BOOKS);
+  const { loading, error, data } = useQuery(GET_BOOKS);
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error: {error.message}</p>;
-
+  if (loading) return <p>Loading...</p>;
+  if (error) {
     return (
-        <div className="App">
-            {data && data.books.map((book/* : Book */) => {
-                return <p key={crypto.randomUUID()}>{book.title} by {book.author}</p>
-            })}
-        </div>
-    )
+      <p>
+        Error:
+        {error.message}
+      </p>
+    );
+  }
+
+  return (
+    <div className="App">
+      {data && data.books.map((book/* : Book */) => (
+        <p key={crypto.randomUUID()}>
+          {book.title}
+          {' '}
+          by
+          {' '}
+          {book.author}
+        </p>
+      ))}
+    </div>
+  );
 }
 
-export default App
+export default App;
