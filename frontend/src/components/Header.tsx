@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import {
-  Box, Button, Container, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, Typography,
-  Link,
+  Box, Button, Container,
+  Drawer, IconButton, List,
+  ListItem, ListItemButton, ListItemIcon,
+  Typography, Link,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import LoginIcon from '@mui/icons-material/Login';
 import InputIcon from '@mui/icons-material/Input';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useReactiveVar } from '@apollo/client';
-import { tokenVar } from '../graphql/cache';
+import { tokenVar } from '../cache';
 
 function Header() {
   const [drawer, setDrawer] = useState(false);
@@ -41,13 +43,13 @@ function Header() {
             <>
               <Link sx={{ color: 'inherit', textDecoration: 'none' }} component={RouterLink} to="/login">
                 <Button variant="outlined">
-                    <Typography variant="button">Login</Typography>
-                  </Button>
+                  <Typography variant="button">Login</Typography>
+                </Button>
               </Link>
               <Link sx={{ color: 'inherit', textDecoration: 'none' }} component={RouterLink} to="/signup">
                 <Button variant="contained">
-                    <Typography variant="button">Signup</Typography>
-                  </Button>
+                  <Typography variant="button">Signup</Typography>
+                </Button>
               </Link>
             </>
           )}
@@ -60,17 +62,17 @@ function Header() {
             <List>
               <Link sx={{ color: 'inherit', textDecoration: 'none' }} component={RouterLink} to="/profile">
                 <ListItem>
-                    <ListItemButton onClick={() => { setDrawer(false); }}>
-                        <ListItemIcon><LoginIcon /></ListItemIcon>
-                        <Typography variant="button">Profile</Typography>
-                      </ListItemButton>
-                  </ListItem>
+                  <ListItemButton onClick={() => { setDrawer(false); }}>
+                    <ListItemIcon><LoginIcon /></ListItemIcon>
+                    <Typography variant="button">Profile</Typography>
+                  </ListItemButton>
+                </ListItem>
               </Link>
               <ListItem>
                 <ListItemButton onClick={() => { handleLogout(); setDrawer(false); }}>
-                    <ListItemIcon><InputIcon /></ListItemIcon>
-                    <Typography variant="button">Logout</Typography>
-                  </ListItemButton>
+                  <ListItemIcon><InputIcon /></ListItemIcon>
+                  <Typography variant="button">Logout</Typography>
+                </ListItemButton>
               </ListItem>
             </List>
           )
@@ -78,23 +80,22 @@ function Header() {
             <List>
               <Link sx={{ color: 'inherit', textDecoration: 'none' }} component={RouterLink} to="/login">
                 <ListItem>
-                    <ListItemButton onClick={() => { setDrawer(false); }}>
-                        <ListItemIcon><LoginIcon /></ListItemIcon>
-                        <Typography variant="button">Login</Typography>
-                      </ListItemButton>
-                  </ListItem>
+                  <ListItemButton onClick={() => { setDrawer(false); }}>
+                    <ListItemIcon><LoginIcon /></ListItemIcon>
+                    <Typography variant="button">Login</Typography>
+                  </ListItemButton>
+                </ListItem>
               </Link>
               <Link sx={{ color: 'inherit', textDecoration: 'none' }} component={RouterLink} to="/signup">
                 <ListItem>
-                    <ListItemButton onClick={() => { setDrawer(false); }}>
-                        <ListItemIcon><InputIcon /></ListItemIcon>
-                        <Typography variant="button">Signup</Typography>
-                      </ListItemButton>
-                  </ListItem>
+                  <ListItemButton onClick={() => { setDrawer(false); }}>
+                    <ListItemIcon><InputIcon /></ListItemIcon>
+                    <Typography variant="button">Signup</Typography>
+                  </ListItemButton>
+                </ListItem>
               </Link>
             </List>
           )}
-
       </Drawer>
     </Container>
   );

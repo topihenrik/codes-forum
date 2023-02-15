@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 
 interface INotificationProps {
-    message: string
+  message: string
 }
 function Notification({ message }: INotificationProps) {
   return (

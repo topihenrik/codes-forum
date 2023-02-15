@@ -2,7 +2,7 @@ import { useMutation } from '@apollo/client';
 import {
   Box, Button, Container, TextField, Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CREATE_USER } from '../graphql/mutations';
 import Notification from './Notification';
@@ -14,11 +14,9 @@ function SignupPage() {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
 
-  useEffect(() => {
-    if (result.data) {
-      navigate('/login');
-    }
-  }, [result.data]);
+  if (result.data) {
+    navigate('/login');
+  }
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();

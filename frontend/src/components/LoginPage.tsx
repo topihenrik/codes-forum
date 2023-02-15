@@ -2,10 +2,10 @@ import {
   Box, Button, Container, TextField, Typography,
 } from '@mui/material';
 import { useMutation } from '@apollo/client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LOGIN_USER } from '../graphql/mutations';
-import { tokenVar } from '../graphql/cache';
+import { tokenVar } from '../cache';
 import Notification from './Notification';
 
 function LoginPage() {
@@ -19,14 +19,12 @@ function LoginPage() {
     login({ variables: { username, password } });
   };
 
-  useEffect(() => {
-    if (result?.data?.login) {
-      const token = result.data.login.value;
-      localStorage.setItem('auth_token', token);
-      tokenVar(token);
-      navigate('/');
-    }
-  }, [result.data]);
+  if (result?.data?.login) {
+    const token = result.data.login.value;
+    localStorage.setItem('auth_token', token);
+    tokenVar(token);
+    navigate('/');
+  }
 
   return (
     <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

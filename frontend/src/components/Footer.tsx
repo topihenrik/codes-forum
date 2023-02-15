@@ -8,11 +8,11 @@ function Footer() {
         Developed by
         <Link
           href="https://github.com/topihenrik"
-sx={{
-    display: 'flex', alignItems: 'center', color: 'inherit', textDecoration: 'none',
-  }}
+          sx={{
+            display: 'flex', alignItems: 'center', color: 'inherit', textDecoration: 'none',
+          }}
         >
-          <img className="icon" src={GitHubIcon} />
+          <img className="icon" alt="GitHub Icon" src={GitHubIcon} />
           topihenrik
         </Link>
       </Typography>
