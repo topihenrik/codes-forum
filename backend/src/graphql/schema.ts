@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag';
 
 const typeDefs = gql`
     scalar Date
@@ -55,6 +55,6 @@ const typeDefs = gql`
             password: String!
         ): Token
     }
-`
+`;
 
 export default typeDefs;

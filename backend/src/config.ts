@@ -1,9 +1,8 @@
-import * as dotenv from "dotenv";
-dotenv.config();
+import * as dotenv from 'dotenv';
 
+dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const { DB_URI } = process.env;
+const { JWT_SECRET } = process.env;
 
-
-
-export default { JWT_SECRET };
+export default { DB_URI, JWT_SECRET };

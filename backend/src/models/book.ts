@@ -1,15 +1,15 @@
-import { Schema, model } from "mongoose";
+import { Schema, model } from 'mongoose';
 
 interface IBook {
-    title: string,
-    author: string
+  title: string,
+  author: string
 }
 
 const BookSchema = new Schema<IBook>(
-    {
-        title: { type: String },
-        author: { type: String }
-    }
+  {
+    title: { type: String },
+    author: { type: String },
+  },
 );
 
-export default model<IBook>("Book", BookSchema);
+export default model<IBook>('Book', BookSchema);
