@@ -5,10 +5,20 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import morgan from 'morgan';
-import resolvers from './graphql/resolvers.js';
+
+import { makeExecutableSchema } from '@graphql-tools/schema';
+// eslint-disable-next-line import/extensions
+import { createApollo4QueryValidationPlugin, constraintDirectiveTypeDefs } from 'graphql-constraint-directive/apollo4.js';
+
 import typeDefs from './graphql/schema.js';
+import resolvers from './graphql/resolvers.js';
 
 import './mongodb.js';
+
+const schema = makeExecutableSchema({
+  typeDefs: [constraintDirectiveTypeDefs, typeDefs],
+  resolvers,
+});
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -17,9 +27,11 @@ export interface MyContext {
   token?: string;
 }
 const server = new ApolloServer<MyContext>({
-  typeDefs,
-  resolvers,
-  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+  schema,
+  plugins: [
+    ApolloServerPluginDrainHttpServer({ httpServer }),
+    createApollo4QueryValidationPlugin({ schema }),
+  ],
 });
 await server.start();
 

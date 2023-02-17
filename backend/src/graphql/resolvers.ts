@@ -14,22 +14,6 @@ const resolvers: Resolvers = {
   },
   Mutation: {
     createUser: async (root, args) => {
-      // username field validation
-      if (args.username.length < 3) {
-        throw new GraphQLError('password min length is 3', { extensions: { code: 'BAD_USER_INPUT' } });
-      }
-
-      const usernameTaken = await User.findOne({ username: args.username });
-
-      if (usernameTaken) {
-        throw new GraphQLError('username already in use', { extensions: { code: 'BAD_USER_INPUT' } });
-      }
-
-      // password field validation
-      if (args.password.length < 3) {
-        throw new GraphQLError('password min length is 3', { extensions: { code: 'BAD_USER_INPUT' } });
-      }
-
       if (args.password !== args.password_confirm) {
         throw new GraphQLError("passwords don't match", { extensions: { code: 'BAD_USER_INPUT' } });
       }

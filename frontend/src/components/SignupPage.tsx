@@ -1,11 +1,15 @@
-import { useMutation } from '@apollo/client';
+import { ServerError, useMutation } from '@apollo/client';
 import {
   Box, Button, Container, TextField, Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CREATE_USER } from '../graphql/mutations';
 import Notification from './Notification';
+
+interface IError {
+  message: string
+}
 
 function SignupPage() {
   const [signup, result] = useMutation(CREATE_USER);
@@ -13,10 +17,22 @@ function SignupPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [error, setError] = useState<null | IError >(null);
 
   if (result.data) {
     navigate('/login');
   }
+
+  useEffect(() => {
+    if (result.error) {
+      if (result.error.networkError) { // parse network error message
+        const netError = result.error.networkError as ServerError;
+        setError({ message: netError.result.errors[0].message });
+      } else { // parse graphql error message
+        setError({ message: result.error.message });
+      }
+    }
+  }, [result.error]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -39,7 +55,7 @@ function SignupPage() {
           <TextField label="username" value={username} onChange={(event) => { setUsername(event.target.value); }} />
           <TextField type="password" label="create password" value={password} onChange={(event) => { setPassword(event.target.value); }} />
           <TextField type="password" label="confirm password" value={passwordConfirm} onChange={(event) => { setPasswordConfirm(event.target.value); }} />
-          {result.error && <Notification message={result.error.message} />}
+          {error && <Notification message={error.message} />}
           <Button variant="contained" type="submit" disabled={result.loading}>Signup</Button>
         </Box>
       </form>

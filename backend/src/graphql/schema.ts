@@ -46,9 +46,9 @@ const typeDefs = gql`
 
     type Mutation {
         createUser(
-            username: String!
-            password: String!
-            password_confirm: String!
+            username: String! @constraint(minLength: 3, maxLength: 255)
+            password: String! @constraint(minLength: 3, maxLength: 255)
+            password_confirm: String! @constraint(minLength: 3, maxLength: 255)
         ): User
         login(
             username: String!
