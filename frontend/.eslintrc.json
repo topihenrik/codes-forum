@@ -25,7 +25,9 @@
         "@typescript-eslint"
     ],
     "rules": {
-        "react/react-in-jsx-scope": "off"
+        "react/react-in-jsx-scope": "off",
+        "react/jsx-max-props-per-line": [1, { "when": "always" }],
+        "jsx-quotes": ["warn", "prefer-single"]
     },
     "settings": {
         "react": {

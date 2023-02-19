@@ -25,7 +25,7 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <div className='App'>
       {data && data.books.map((book/* : Book */) => (
         <p key={crypto.randomUUID()}>
           {book.title}

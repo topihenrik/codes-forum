@@ -6,6 +6,7 @@ import config from '../config.js';
 import { Resolvers } from '../__generated__/resolvers-types';
 import Book from '../models/book.js';
 import User from '../models/user.js';
+import { IToken } from '../types';
 
 const resolvers: Resolvers = {
   Date: DateResolver,
@@ -35,7 +36,7 @@ const resolvers: Resolvers = {
         throw new GraphQLError('incorrect credentials', { extensions: { code: 'BAD_USER_INPUT' } });
       }
 
-      const token = {
+      const token: IToken = {
         id: user.id,
         username: user.username,
       };

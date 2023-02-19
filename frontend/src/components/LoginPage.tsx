@@ -34,15 +34,30 @@ function LoginPage() {
         }}
         onSubmit={handleSubmit}
       >
-        <Typography variant="h6">Login</Typography>
+        <Typography variant='h6'>Login</Typography>
         <Box sx={{
           display: 'flex', flexDirection: 'column', gap: '16px', width: 'fit-content',
         }}
         >
-          <TextField label="username" value={username} onChange={(event) => { setUsername(event.target.value); }} />
-          <TextField type="password" label="password" value={password} onChange={(event) => { setPassword(event.target.value); }} />
+          <TextField
+            label='username'
+            value={username}
+            onChange={(event) => { setUsername(event.target.value); }}
+          />
+          <TextField
+            type='password'
+            label='password'
+            value={password}
+            onChange={(event) => { setPassword(event.target.value); }}
+          />
           {result.error && <Notification message={result.error.message} />}
-          <Button variant="contained" type="submit" disabled={result.loading}>Login</Button>
+          <Button
+            variant='contained'
+            type='submit'
+            disabled={result.loading}
+          >
+            Login
+          </Button>
         </Box>
       </form>
     </Container>
