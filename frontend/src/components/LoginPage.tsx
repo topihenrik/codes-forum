@@ -28,39 +28,40 @@ function LoginPage() {
 
   return (
     <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Paper sx={{ padding: { xs: '24px', sm: '32px' } }}>
-        <form
-          style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'fit-content', gap: '16px',
+      <Paper>
+        <Paper sx={{
+          backgroundColor: 'primary.dark', borderBottomLeftRadius: '0', borderBottomRightRadius: '0', padding: '16px', display: 'flex', justifyContent: 'center',
+        }}
+        >
+          <Typography variant='h4'>Login</Typography>
+        </Paper>
+        <Box
+          component='form'
+          sx={{
+            display: 'flex', flexDirection: 'column', gap: '16px', padding: { xs: '24px', sm: '32px' }, width: { xs: 'fit-content', sm: '340px' },
           }}
           onSubmit={handleSubmit}
         >
-          <Typography variant='h4'>Login</Typography>
-          <Box sx={{
-            display: 'flex', flexDirection: 'column', gap: '16px', width: { xs: 'fit-content', sm: '340px' },
-          }}
+          <TextField
+            label='Username'
+            value={username}
+            onChange={(event) => { setUsername(event.target.value); }}
+          />
+          <TextField
+            type='password'
+            label='Password'
+            value={password}
+            onChange={(event) => { setPassword(event.target.value); }}
+          />
+          {result.error && <Notification message={result.error.message} />}
+          <Button
+            variant='contained'
+            type='submit'
+            disabled={result.loading}
           >
-            <TextField
-              label='Username'
-              value={username}
-              onChange={(event) => { setUsername(event.target.value); }}
-            />
-            <TextField
-              type='password'
-              label='Password'
-              value={password}
-              onChange={(event) => { setPassword(event.target.value); }}
-            />
-            {result.error && <Notification message={result.error.message} />}
-            <Button
-              variant='contained'
-              type='submit'
-              disabled={result.loading}
-            >
-              Login
-            </Button>
-          </Box>
-        </form>
+            Login
+          </Button>
+        </Box>
       </Paper>
     </Container>
   );
