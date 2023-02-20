@@ -1,5 +1,5 @@
 import {
-  Box, Button, Container, TextField, Typography,
+  Box, Button, Container, TextField, Typography, Paper,
 } from '@mui/material';
 import { useMutation } from '@apollo/client';
 import { useState } from 'react';
@@ -28,38 +28,40 @@ function LoginPage() {
 
   return (
     <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <form
-        style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'fit-content', gap: '16px',
-        }}
-        onSubmit={handleSubmit}
-      >
-        <Typography variant='h6'>Login</Typography>
-        <Box sx={{
-          display: 'flex', flexDirection: 'column', gap: '16px', width: 'fit-content',
-        }}
+      <Paper sx={{ padding: { xs: '24px', sm: '32px' } }}>
+        <form
+          style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'fit-content', gap: '16px',
+          }}
+          onSubmit={handleSubmit}
         >
-          <TextField
-            label='username'
-            value={username}
-            onChange={(event) => { setUsername(event.target.value); }}
-          />
-          <TextField
-            type='password'
-            label='password'
-            value={password}
-            onChange={(event) => { setPassword(event.target.value); }}
-          />
-          {result.error && <Notification message={result.error.message} />}
-          <Button
-            variant='contained'
-            type='submit'
-            disabled={result.loading}
+          <Typography variant='h4'>Login</Typography>
+          <Box sx={{
+            display: 'flex', flexDirection: 'column', gap: '16px', width: { xs: 'fit-content', sm: '340px' },
+          }}
           >
-            Login
-          </Button>
-        </Box>
-      </form>
+            <TextField
+              label='Username'
+              value={username}
+              onChange={(event) => { setUsername(event.target.value); }}
+            />
+            <TextField
+              type='password'
+              label='Password'
+              value={password}
+              onChange={(event) => { setPassword(event.target.value); }}
+            />
+            {result.error && <Notification message={result.error.message} />}
+            <Button
+              variant='contained'
+              type='submit'
+              disabled={result.loading}
+            >
+              Login
+            </Button>
+          </Box>
+        </form>
+      </Paper>
     </Container>
   );
 }
