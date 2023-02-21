@@ -1,17 +1,64 @@
-import ReactDOM from 'react-dom/client'
-import App from './App'
-import './index.css'
+import ReactDOM from 'react-dom/client';
+import { ApolloClient, ApolloProvider } from '@apollo/client';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material';
+import cache from './cache';
+import link from './link';
+import theme from './theme';
+import './index.css';
+import HomePage from './components/HomePage';
+import SignupPage from './components/SignupPage';
+import LoginPage from './components/LoginPage';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import AccountPage from './components/AccountPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import ProfilePage from './components/ProfilePage';
 
-import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
-
-const client = new ApolloClient({
-  uri: import.meta.env.VITE_NODE_ENV === "production" ? "/graphql" : "http://localhost:4000/graphql",
-  cache: new InMemoryCache(),
-});
+const client = new ApolloClient(
+  {
+    cache,
+    link,
+  },
+);
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <ApolloProvider client={client}>
-    <h1 id="helloworld">Hello World!</h1>
-    <App />
-  </ApolloProvider>
-)
+    <Router>
+      <ThemeProvider theme={theme}>
+        <Header />
+        <Routes>
+          <Route
+            path='/'
+            element={<HomePage />}
+          />
+          <Route
+            path='/signup'
+            element={<SignupPage />}
+          />
+          <Route
+            path='/login'
+            element={<LoginPage />}
+          />
+          <Route
+            path='/account'
+            element={(
+              <ProtectedRoute>
+                <AccountPage />
+              </ProtectedRoute>
+            )}
+          />
+          <Route
+            path='/profile/:id'
+            element={(
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            )}
+          />
+        </Routes>
+        <Footer />
+      </ThemeProvider>
+    </Router>
+  </ApolloProvider>,
+);
