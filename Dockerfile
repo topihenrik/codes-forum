@@ -42,7 +42,6 @@ WORKDIR /app
 ENV NODE_ENV production
 COPY --from=builder-ts /app/backend/build  /app/build
 COPY --from=builder-ts /app/backend/front /app/front
-COPY --from=builder-ts /app/backend/src/*.graphql /app/src/
 COPY --from=builder-ts /app/backend/package*.json /app/
 RUN npm ci
 
