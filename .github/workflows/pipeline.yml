@@ -14,7 +14,7 @@ jobs:
       mongo:
         image: mongo
         env:
-          MONGO_INITDB_DATABASE: devops-test
+          MONGO_INITDB_DATABASE: test-codes-forum
         ports:
           - 27017:27017
     steps:
@@ -22,6 +22,11 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18"
+      - name: create .env.test file
+        run: |
+          touch backend/.env.test
+          echo DB_URI=${{ secrets.DB_URI }} >> backend/.env.test
+          echo JWT_SECRET=${{ secrets.DB_URI }} >> backend/.env.test
       - name: install backend
         run: npm install --prefix backend
       - name: install frontend

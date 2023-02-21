@@ -9,25 +9,29 @@ import { Link as RouterLink } from 'react-router-dom';
 import LoginIcon from '@mui/icons-material/Login';
 import InputIcon from '@mui/icons-material/Input';
 import MenuIcon from '@mui/icons-material/Menu';
-import { useReactiveVar } from '@apollo/client';
+import { useApolloClient, useReactiveVar } from '@apollo/client';
 import { tokenVar } from '../cache';
 
 function Header() {
   const [drawer, setDrawer] = useState(false);
   const token = useReactiveVar(tokenVar);
+  const client = useApolloClient();
 
   const handleLogout = () => {
-    localStorage.clear();
     tokenVar(null);
+    localStorage.clear();
+    client.clearStore();
   };
 
   return (
     <Paper sx={{
-      width: '100%', padding: '8px 16px', boxSizing: 'border-box', position: 'sticky', top: '0px',
+      width: '100%', boxSizing: 'border-box', position: 'sticky', top: '0', zIndex: '10',
     }}
     >
       <Container
-        sx={{ display: 'flex', justifyContent: 'space-between', boxSizing: 'border-box' }}
+        sx={{
+          display: 'flex', justifyContent: 'space-between', boxSizing: 'border-box', padding: '8px',
+        }}
       >
         {/* Desktop */}
         <Link
@@ -42,6 +46,7 @@ function Header() {
             ? (
               <>
                 <Link
+                  id='link-profile-desktop'
                   sx={{ color: 'inherit', textDecoration: 'none' }}
                   component={RouterLink}
                   to='/profile/test'
@@ -51,6 +56,7 @@ function Header() {
                   </Button>
                 </Link>
                 <Link
+                  id='link-account-desktop'
                   sx={{ color: 'inherit', textDecoration: 'none' }}
                   component={RouterLink}
                   to='/account'
@@ -60,6 +66,7 @@ function Header() {
                   </Button>
                 </Link>
                 <Button
+                  id='link-logout-desktop'
                   variant='outlined'
                   onClick={handleLogout}
                 >
@@ -70,6 +77,7 @@ function Header() {
             : (
               <>
                 <Link
+                  id='link-login-desktop'
                   sx={{ color: 'inherit', textDecoration: 'none' }}
                   component={RouterLink}
                   to='/login'
@@ -79,6 +87,7 @@ function Header() {
                   </Button>
                 </Link>
                 <Link
+                  id='link-signup-desktop'
                   sx={{ color: 'inherit', textDecoration: 'none' }}
                   component={RouterLink}
                   to='/signup'
@@ -115,6 +124,18 @@ function Header() {
                     <ListItemButton onClick={() => { setDrawer(false); }}>
                       <ListItemIcon><LoginIcon /></ListItemIcon>
                       <Typography variant='button'>Profile</Typography>
+                    </ListItemButton>
+                  </ListItem>
+                </Link>
+                <Link
+                  sx={{ color: 'inherit', textDecoration: 'none' }}
+                  component={RouterLink}
+                  to='/account'
+                >
+                  <ListItem>
+                    <ListItemButton onClick={() => { setDrawer(false); }}>
+                      <ListItemIcon><LoginIcon /></ListItemIcon>
+                      <Typography variant='button'>Account</Typography>
                     </ListItemButton>
                   </ListItem>
                 </Link>

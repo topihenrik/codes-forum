@@ -1,7 +1,10 @@
 import {
-  Container, Box, Typography, Table, Paper, TableHead, TableRow, TableCell, TableBody,
+  Container, Box, Typography, Table, Paper, TableHead, TableRow, TableCell, TableBody, Avatar,
 } from '@mui/material';
+import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
+import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 
+// Profile information section has fake data -> Implement backend fetching functionality.
 // Component's table has fake data -> Implement backend fetching functionality.
 function ProfilePage() {
   return (
@@ -9,7 +12,10 @@ function ProfilePage() {
       display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 0',
     }}
     >
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <Box sx={{
+        display: 'flex', flexDirection: 'column', gap: '16px', margin: { xs: '0 8px', sm: '0' }, width: { xs: 'auto', sm: 'clamp(320px, 55%, 576px)' },
+      }}
+      >
         <Paper>
           <Paper sx={{
             backgroundColor: 'primary.dark', borderBottomLeftRadius: '0', borderBottomRightRadius: '0', padding: '8px',
@@ -22,32 +28,38 @@ function ProfilePage() {
               Profile
             </Typography>
           </Paper>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '16px' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <img
-                style={{ height: '128px', width: '128px', borderRadius: '8px' }}
-                alt='avatar'
-                src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
-              />
-              <Typography>@jartsa82</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', padding: '16px' }}>
+            <Box sx={{ display: 'flex', gap: '32px' }}>
+              <Box sx={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px',
+              }}
+              >
+                <Avatar
+                  sx={{ height: { xs: '80px', sm: '128px' }, width: { xs: '80px', sm: '128px' }, borderRadius: '8px' }}
+                  alt='avatar'
+                  src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
+                />
+                <Typography>@jartsa82</Typography>
+              </Box>
               <Typography>
                 Bio: Hello I am a typical User!
               </Typography>
-              <Box>
-                <Typography>
-                  Posts: 13
-                </Typography>
-                <Typography>
-                  Comments: 27
-                </Typography>
-                <Typography>
-                  Account Age: 1337 days
-                </Typography>
-              </Box>
             </Box>
           </Box>
+          <Paper sx={{
+            display: 'flex', justifyContent: 'space-between', backgroundColor: 'grey.900', borderTopLeftRadius: '0', borderTopRightRadius: '0', padding: '8px',
+          }}
+          >
+            <Typography>
+              Posts: 13
+            </Typography>
+            <Typography>
+              Comments: 27
+            </Typography>
+            <Typography>
+              Account Age: 1337 days
+            </Typography>
+          </Paper>
         </Paper>
         <Paper>
           <Paper sx={{ backgroundColor: 'primary.dark', borderBottomLeftRadius: '0', borderBottomRightRadius: '0' }}>
@@ -69,10 +81,10 @@ function ProfilePage() {
                     Date
                   </TableCell>
                   <TableCell>
-                    Comments
+                    <ForumOutlinedIcon />
                   </TableCell>
                   <TableCell>
-                    Likes
+                    <ThumbUpOutlinedIcon />
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -82,7 +94,7 @@ function ProfilePage() {
                     TEST: Hello Kitty
                   </TableCell>
                   <TableCell>
-                    19/02/2023
+                    19.02.2023
                   </TableCell>
                   <TableCell>
                     4
@@ -96,7 +108,7 @@ function ProfilePage() {
                     TEST: Hello World
                   </TableCell>
                   <TableCell>
-                    16/01/2023
+                    16.01.2023
                   </TableCell>
                   <TableCell>
                     2
@@ -110,7 +122,7 @@ function ProfilePage() {
                     TEST: Hello Wow
                   </TableCell>
                   <TableCell>
-                    05/01/2023
+                    05.01.2023
                   </TableCell>
                   <TableCell>
                     14
@@ -137,29 +149,23 @@ function ProfilePage() {
               <TableHead>
                 <TableRow>
                   <TableCell>
-                    Post
-                  </TableCell>
-                  <TableCell>
                     Comment
                   </TableCell>
                   <TableCell>
                     Date
                   </TableCell>
                   <TableCell>
-                    Likes
+                    <ThumbUpOutlinedIcon />
                   </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 <TableRow>
                   <TableCell>
-                    TEST: Hello Kitty
-                  </TableCell>
-                  <TableCell>
                     Are you sure?
                   </TableCell>
                   <TableCell>
-                    19/02/2023
+                    19.02.2023
                   </TableCell>
                   <TableCell>
                     2
@@ -167,13 +173,10 @@ function ProfilePage() {
                 </TableRow>
                 <TableRow>
                   <TableCell>
-                    TEST: Hello World
-                  </TableCell>
-                  <TableCell>
                     Amazing post!
                   </TableCell>
                   <TableCell>
-                    05/02/2023
+                    05.02.2023
                   </TableCell>
                   <TableCell>
                     3
@@ -181,13 +184,10 @@ function ProfilePage() {
                 </TableRow>
                 <TableRow>
                   <TableCell>
-                    TEST: Hello Wow
-                  </TableCell>
-                  <TableCell>
                     Why did you do it?
                   </TableCell>
                   <TableCell>
-                    08/01/2023
+                    08.01.2023
                   </TableCell>
                   <TableCell>
                     1

@@ -13,7 +13,7 @@ const UserSchema = new Schema<IUser>(
   {
     username: { type: String, required: true },
     password: { type: String, required: true },
-    bio: { type: String },
+    bio: { type: String, default: '' },
     admin: { type: Boolean, default: false },
     createdAt: { type: Date },
     updatedAt: { type: Date },

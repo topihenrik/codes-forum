@@ -1,4 +1,4 @@
-import { gql } from '../__generated__';
+import { gql } from '../__generated__/gql';
 
 export const CREATE_USER = gql(/* GraphQL */`
     mutation createUser($username: String!, $password: String!, $password_confirm: String!) {

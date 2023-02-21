@@ -12,6 +12,7 @@ const typeDefs = gql`
     type User {
         id: ID
         username: String
+        bio: String
     }
 
     type Post {
@@ -41,7 +42,7 @@ const typeDefs = gql`
     }
 
     type Query {
-        books: [Book!]!
+        account: User
     }
 
     type Mutation {

@@ -4,17 +4,21 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import config from '../config.js';
 import { Resolvers } from '../__generated__/resolvers-types';
-import Book from '../models/book.js';
 import User from '../models/user.js';
 import { IToken } from '../types';
 
 const resolvers: Resolvers = {
   Date: DateResolver,
   Query: {
-    books: async () => Book.find({}),
+    account: async (root, args, contextValue) => contextValue.currentUser,
   },
   Mutation: {
     createUser: async (root, args) => {
+      const existingUsername = await User.findOne({ username: args.username });
+      if (existingUsername) {
+        throw new GraphQLError('username already exists', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
       if (args.password !== args.password_confirm) {
         throw new GraphQLError("passwords don't match", { extensions: { code: 'BAD_USER_INPUT' } });
       }

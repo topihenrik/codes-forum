@@ -47,8 +47,13 @@ function SignupPage() {
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    signup({ variables: { username, password, password_confirm: passwordConfirm } });
+    try {
+      event.preventDefault();
+      await signup({ variables: { username, password, password_confirm: passwordConfirm } });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
   };
 
   return (
@@ -69,17 +74,20 @@ function SignupPage() {
           onSubmit={handleSubmit}
         >
           <TextField
+            id='input-username'
             label='Username'
             value={username}
             onChange={(event) => { setUsername(event.target.value); }}
           />
           <TextField
+            id='input-password'
             type='password'
             label='Create Password'
             value={password}
             onChange={(event) => { setPassword(event.target.value); }}
           />
           <TextField
+            id='input-confirm-password'
             type='password'
             label='Confirm Password'
             value={passwordConfirm}
@@ -100,6 +108,7 @@ function SignupPage() {
           </Button>
           {error && <Notification message={error.message} />}
           <Button
+            id='btn-signup'
             variant='contained'
             type='submit'
             disabled={result.loading}

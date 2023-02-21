@@ -2,7 +2,7 @@ import {
   Box, Button, Container, TextField, Typography, Paper,
 } from '@mui/material';
 import { useMutation } from '@apollo/client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LOGIN_USER } from '../graphql/mutations';
 import { tokenVar } from '../cache';
@@ -14,17 +14,31 @@ function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    login({ variables: { username, password } });
+  const handleSubmit = async (event: React.FormEvent) => {
+    try {
+      event.preventDefault();
+      await login({ variables: { username, password } });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
   };
 
-  if (result?.data?.login) {
+  /* if (result?.data?.login) {
     const token = result.data.login.value;
     localStorage.setItem('auth_token', token);
     tokenVar(token);
     navigate('/');
-  }
+  } */
+
+  useEffect(() => {
+    if (result?.data?.login) {
+      const token = result.data.login.value;
+      localStorage.setItem('auth_token', token);
+      tokenVar(token);
+      navigate('/');
+    }
+  }, [result.data, navigate]);
 
   return (
     <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -33,7 +47,7 @@ function LoginPage() {
           backgroundColor: 'primary.dark', borderBottomLeftRadius: '0', borderBottomRightRadius: '0', padding: '16px', display: 'flex', justifyContent: 'center',
         }}
         >
-          <Typography variant='h4'>Login</Typography>
+          <Typography variant='h4'>Account Login</Typography>
         </Paper>
         <Box
           component='form'
@@ -43,11 +57,13 @@ function LoginPage() {
           onSubmit={handleSubmit}
         >
           <TextField
+            id='input-username'
             label='Username'
             value={username}
             onChange={(event) => { setUsername(event.target.value); }}
           />
           <TextField
+            id='input-password'
             type='password'
             label='Password'
             value={password}
@@ -55,6 +71,7 @@ function LoginPage() {
           />
           {result.error && <Notification message={result.error.message} />}
           <Button
+            id='btn-login'
             variant='contained'
             type='submit'
             disabled={result.loading}
