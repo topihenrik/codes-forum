@@ -1,40 +1,32 @@
 import gql from 'graphql-tag';
 
 const typeDefs = gql`
-    scalar Date
+    scalar DateTime
 
-    type Book {
-        _id: ID
-        title: String
-        author: String
-    }
-    
     type User {
-        id: ID
+        _id: ID
         username: String
         bio: String
     }
 
     type Post {
-        id: ID
+        _id: ID
         title: String
-        code: String
-        message: String
+        body: String
         author: User
-        likes: [User]
-        likeCount: Int
-        createdAt: Date
-        updatedAt: Date
+        voteCount: Int
+        createdAt: DateTime
+        updatedAt: DateTime
     }
 
     type Comment {
-        id: ID
+        _id: ID
         body: String
         author: User
-        likes: [User]
-        likeCount: Int
-        createdAt: Date
-        updatedAt: Date
+        votes: [User]
+        voteCount: Int
+        createdAt: DateTime
+        updatedAt: DateTime
     }
 
     type Token {
@@ -43,6 +35,8 @@ const typeDefs = gql`
 
     type Query {
         account: User
+        posts: [Post!]
+        post(_id: String!): Post
     }
 
     type Mutation {
@@ -55,6 +49,10 @@ const typeDefs = gql`
             username: String!
             password: String!
         ): Token
+        createPost(
+            title: String!
+            body: String!
+        ): Post
     }
 `;
 

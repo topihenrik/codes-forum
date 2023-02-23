@@ -10,8 +10,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 // eslint-disable-next-line import/extensions
 import { createApollo4QueryValidationPlugin, constraintDirectiveTypeDefs } from 'graphql-constraint-directive/apollo4.js';
 
-import { FlattenMaps, LeanDocument } from 'mongoose';
-import { IUser } from './models/user';
+import { type ICurrentUser } from './types';
 
 import typeDefs from './graphql/schema.js';
 import resolvers from './graphql/resolvers.js';
@@ -29,7 +28,7 @@ const httpServer = http.createServer(app);
 
 export interface MyContext {
   // token?: string,
-  currentUser: null | FlattenMaps<LeanDocument<IUser>>
+  currentUser: null | ICurrentUser
 }
 const server = new ApolloServer<MyContext>({
   schema,

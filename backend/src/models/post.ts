@@ -1,12 +1,12 @@
 import { Schema, model } from 'mongoose';
 
-interface IPost {
+export interface IPost {
+  _id: string,
   title: string,
-  code: string,
-  message: string,
+  body: string,
   author: Schema.Types.ObjectId,
-  likes: [Schema.Types.ObjectId],
-  likeCount: number,
+  votes: [Schema.Types.ObjectId],
+  voteCount: number,
   createdAt: Date,
   updatedAt: Date
 }
@@ -14,22 +14,16 @@ interface IPost {
 const PostSchema = new Schema<IPost>(
   {
     title: { type: String, required: true },
-    code: { type: String, required: true },
-    message: { type: String, required: true },
+    body: { type: String, required: true },
     author: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
-    likes: { type: [Schema.Types.ObjectId], ref: 'User' },
-    likeCount: { type: Number },
-    createdAt: { type: Date },
-    updatedAt: { type: Date },
+    votes: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
+    voteCount: { type: Number, default: 0 },
+    /* createdAt: { type: Date },
+    updatedAt: { type: Date }, */
+  },
+  {
+    timestamps: true,
   },
 );
-
-PostSchema.set('toJSON', {
-  transform: (_document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString();
-    delete returnedObject._id;
-    delete returnedObject.__v;
-  },
-});
 
 export default model<IPost>('Post', PostSchema);

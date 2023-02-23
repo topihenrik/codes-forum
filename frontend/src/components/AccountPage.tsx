@@ -154,7 +154,7 @@ function AccountPage() {
     }}
     >
       <Box sx={{
-        display: 'flex', flexDirection: 'column', gap: '32px', margin: { xs: '0 8px', sm: '0' }, width: { xs: 'auto', sm: 'clamp(320px, 55%, 576px)' },
+        display: 'flex', flexDirection: 'column', gap: '32px', margin: { xs: '0 8px', sm: '0' }, width: 'clamp(300px, 70%, 576px)',
       }}
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

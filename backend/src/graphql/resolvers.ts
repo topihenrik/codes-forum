@@ -1,16 +1,22 @@
 import { GraphQLError } from 'graphql';
-import { DateResolver } from 'graphql-scalars';
+import { DateTimeResolver } from 'graphql-scalars';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import config from '../config.js';
-import { Resolvers } from '../__generated__/resolvers-types';
+import { Resolvers, type Post as PostType } from '../__generated__/resolvers-types';
 import User from '../models/user.js';
+import Post from '../models/post.js';
 import { IToken } from '../types';
 
 const resolvers: Resolvers = {
-  Date: DateResolver,
+  DateTime: DateTimeResolver,
+  Post: {
+    author: async (root) => User.findById(root.author),
+  },
   Query: {
-    account: async (root, args, contextValue) => contextValue.currentUser,
+    account: async (root, args, context) => context.currentUser,
+    posts: async () => Post.find({}),
+    post: async (root, args) => Post.findById(args._id),
   },
   Mutation: {
     createUser: async (root, args) => {
@@ -41,11 +47,25 @@ const resolvers: Resolvers = {
       }
 
       const token: IToken = {
-        id: user.id,
+        _id: user._id,
         username: user.username,
       };
 
       return { value: jwt.sign(token, config.JWT_SECRET) };
+    },
+    createPost: async (root, args, context) => {
+      if (!context.currentUser) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const newPost = new Post(
+        {
+          title: args.title,
+          body: args.body,
+          author: context.currentUser._id,
+        },
+      );
+      return newPost.save() as Promise<PostType>;
     },
   },
 };

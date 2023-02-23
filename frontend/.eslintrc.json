@@ -27,8 +27,10 @@
     "rules": {
         "react/react-in-jsx-scope": "off",
         "import/extensions": "off",
+        "no-underscore-dangle": "off",
         "react/jsx-max-props-per-line": [1, { "when": "always" }],
-        "jsx-quotes": ["warn", "prefer-single"]
+        "jsx-quotes": ["warn", "prefer-single"],
+        "linebreak-style": ["warn", "windows"]
     },
     "settings": {
         "react": {
