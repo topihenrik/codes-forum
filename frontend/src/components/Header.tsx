@@ -39,7 +39,7 @@ function Header() {
           component={RouterLink}
           to='/'
         >
-          <Typography variant='h4'>&lt;codes/&gt;</Typography>
+          <Typography variant='h4'>DebugIt()</Typography>
         </Link>
         <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: '16px', alignItems: 'center' }}>
           {token

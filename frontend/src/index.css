@@ -8,6 +8,11 @@ html, body, #root {
     padding: 0;
 }
 
+pre {
+    white-space: pre-wrap;
+    background-color: rgb(19, 19, 19);
+}
+
 #root {
     display: flex;
     flex-direction: column;
@@ -20,4 +25,21 @@ html, body, #root {
     height: 16px;
     width: 16px;
     margin: 0 4px;
+}
+
+*::selection {
+    background-color: #4f976d;
+}
+
+.draftjs-wrapper, .draftjs-editor, .draftjs-toolbar {
+    background-color: white;
+    color: black;
+}
+
+.draftjs-wrapper {
+    min-height: 480px;
+}
+
+.draftjs-editor {
+    padding: 8px;
 }

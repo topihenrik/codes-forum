@@ -14,7 +14,7 @@ function ProtectedRoute({ children }: Props) {
 
   useEffect(() => {
     if (!token) {
-      navigate('/login');
+      navigate('/login', { replace: true });
     }
   }, [token, navigate]);
 
