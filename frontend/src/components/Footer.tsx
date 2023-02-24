@@ -16,7 +16,7 @@ function Footer() {
             }}
           >
             <img
-              className='icon'
+              className='icon github-icon'
               alt='GitHub Icon'
               src={GitHubIcon}
             />

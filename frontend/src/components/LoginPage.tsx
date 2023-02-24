@@ -14,7 +14,7 @@ function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleLoginSubmit = async (event: React.FormEvent) => {
     try {
       event.preventDefault();
       await login({ variables: { username, password } });
@@ -54,7 +54,7 @@ function LoginPage() {
           sx={{
             display: 'flex', flexDirection: 'column', gap: '16px', padding: { xs: '24px', sm: '32px' }, width: { xs: 'fit-content', sm: '340px' },
           }}
-          onSubmit={handleSubmit}
+          onSubmit={handleLoginSubmit}
         >
           <TextField
             id='input-username'

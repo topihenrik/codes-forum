@@ -14,18 +14,19 @@ const options = [
 ];
 
 interface IDraftEditorProps {
+  name: string,
   editorState: EditorState,
   onEditorStateChange: (newEditorState: EditorState) => void,
 }
 
-function DraftEditor({ editorState, onEditorStateChange }: IDraftEditorProps) {
+function DraftEditor({ name, editorState, onEditorStateChange }: IDraftEditorProps) {
   return (
     <Editor
       editorState={editorState}
       onEditorStateChange={onEditorStateChange}
-      wrapperClassName='draftjs-wrapper'
-      editorClassName='draftjs-editor'
-      toolbarClassName='draftjs-toolbar'
+      wrapperClassName={`draftjs-wrapper draftjs-wrapper-${name}`}
+      editorClassName={`draftjs-editor draftjs-editor-${name}`}
+      toolbarClassName={`draftjs-toolbar draftjs-toolbar-${name}`}
       toolbar={{ options }}
     />
   );

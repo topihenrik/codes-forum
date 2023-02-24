@@ -43,3 +43,19 @@ export const GET_POST = gql(/* GraphQL */`
     }
   }
 `);
+
+export const GET_COMMENTS = gql(/* GraphQL */`
+  query comments($post: String!) {
+    comments(post: $post) {
+      _id
+      body
+      author {
+        _id
+        username
+      }
+      voteCount
+      createdAt
+      updatedAt
+    }
+  }
+`);

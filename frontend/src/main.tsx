@@ -16,11 +16,11 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ProfilePage from './components/ProfilePage';
 import PostCreatePage from './components/PostCreatePage';
 import PostPage from './components/PostPage';
+import ErrorPage from './components/ErrorPage';
 
 const client = new ApolloClient(
   {
-    cache,
-    link,
+    cache, link,
   },
 );
 
@@ -69,6 +69,10 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
           <Route
             path='/post/:id'
             element={<PostPage />}
+          />
+          <Route
+            path='/error'
+            element={<ErrorPage />}
           />
         </Routes>
         <Footer />
