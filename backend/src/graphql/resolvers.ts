@@ -3,9 +3,10 @@ import { DateTimeResolver } from 'graphql-scalars';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import config from '../config.js';
-import { Resolvers, type Post as PostType } from '../__generated__/resolvers-types';
+import { type Comment as CommentType, Resolvers, type Post as PostType } from '../__generated__/resolvers-types';
 import User from '../models/user.js';
 import Post from '../models/post.js';
+import Comment from '../models/comment.js';
 import { IToken } from '../types';
 
 const resolvers: Resolvers = {
@@ -13,10 +14,14 @@ const resolvers: Resolvers = {
   Post: {
     author: async (root) => User.findById(root.author),
   },
+  Comment: {
+    author: async (root) => User.findById(root.author),
+  },
   Query: {
     account: async (root, args, context) => context.currentUser,
     posts: async () => Post.find({}),
     post: async (root, args) => Post.findById(args._id),
+    comments: async (root, args) => Comment.find({ post: args.post }),
   },
   Mutation: {
     createUser: async (root, args) => {
@@ -66,6 +71,20 @@ const resolvers: Resolvers = {
         },
       );
       return newPost.save() as Promise<PostType>;
+    },
+    createComment: async (root, args, context) => {
+      if (!context.currentUser) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const newComment = new Comment(
+        {
+          body: args.body,
+          post: args.post,
+          author: context.currentUser._id,
+        },
+      );
+      return newComment.save() as Promise<CommentType>;
     },
   },
 };

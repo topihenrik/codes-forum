@@ -16,8 +16,9 @@ const UserSchema = new Schema<IUser>(
     password: { type: String, required: true },
     bio: { type: String, default: '' },
     admin: { type: Boolean, default: false },
-    createdAt: { type: Date },
-    updatedAt: { type: Date },
+  },
+  {
+    timestamps: true,
   },
 );
 

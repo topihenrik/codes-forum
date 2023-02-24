@@ -23,7 +23,6 @@ const typeDefs = gql`
         _id: ID
         body: String
         author: User
-        votes: [User]
         voteCount: Int
         createdAt: DateTime
         updatedAt: DateTime
@@ -37,6 +36,7 @@ const typeDefs = gql`
         account: User
         posts: [Post!]
         post(_id: String!): Post
+        comments(post: String!): [Comment!]
     }
 
     type Mutation {
@@ -53,6 +53,10 @@ const typeDefs = gql`
             title: String!
             body: String!
         ): Post
+        createComment(
+            body: String!
+            post: String!
+        ): Comment
     }
 `;
 

@@ -8,12 +8,13 @@ import { useNavigate } from 'react-router-dom';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { useMutation, useReactiveVar } from '@apollo/client';
+import { ServerError, useMutation, useReactiveVar } from '@apollo/client';
 import { tokenVar } from '../cache';
 import { decodeToken, type IDecodedToken } from '../utils';
 import DraftEditor from './DraftEditor';
 import { CREATE_POST } from '../graphql/mutations';
 import { GET_POSTS } from '../graphql/queries';
+import Notification from './Notification';
 
 const TitleTextField = styled(TextField)({
   '& label.Mui-focused': {
@@ -36,11 +37,16 @@ const TitleTextField = styled(TextField)({
   },
 });
 
+interface IError {
+  message: string
+}
+
 function PostCreatePage() {
   const [title, setTitle] = useState('');
   const navigate = useNavigate();
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const [decodedToken, setDecodedToken] = useState<IDecodedToken | null>(null);
+  const [error, setError] = useState<IError | null >(null);
   const token = useReactiveVar(tokenVar);
   const [createPost, result] = useMutation(
     CREATE_POST,
@@ -59,25 +65,44 @@ function PostCreatePage() {
     setDecodedToken(decodeToken(token));
   }, [token]);
 
+  useEffect(() => {
+    if (result.error) {
+      if (result.error.networkError) { // parse network error message
+        const netError = result.error.networkError as ServerError;
+        setError({ message: netError.result.errors[0].message });
+      } else { // parse graphql error message
+        setError({ message: result.error.message });
+      }
+    }
+  }, [result.error]);
+
   const handleEditorChange = (newEditorState: EditorState) => {
     setEditorState(newEditorState);
   };
 
-  const handleSubmit = async () => {
-    if (editorState.getCurrentContent().getPlainText().length >= 50 || title.length >= 5) {
-      try {
-        await createPost(
-          {
-            variables: {
-              title,
-              body: JSON.stringify(convertToRaw(editorState.getCurrentContent())),
-            },
+  const handlePostSubmit = async () => {
+    if (title.length <= 5) {
+      setError({ message: 'Title too short. Minimum length: 5' });
+      return;
+    }
+
+    if (editorState.getCurrentContent().getPlainText().length <= 50) {
+      setError({ message: 'Post too short. Minimum length: 50' });
+      return;
+    }
+
+    try {
+      await createPost(
+        {
+          variables: {
+            title,
+            body: JSON.stringify(convertToRaw(editorState.getCurrentContent())),
           },
-        );
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
-      }
+        },
+      );
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
     }
   };
 
@@ -111,17 +136,19 @@ function PostCreatePage() {
               />
             </Box>
             <DraftEditor
+              name='post'
               editorState={editorState}
               onEditorStateChange={handleEditorChange}
             />
           </Box>
+          {error && <Notification message={error.message} />}
           <Box sx={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '8px',
           }}
           >
             <Button
               variant='contained'
-              onClick={handleSubmit}
+              onClick={handlePostSubmit}
             >
               Submit
             </Button>

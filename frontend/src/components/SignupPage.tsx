@@ -46,7 +46,7 @@ function SignupPage() {
     setFile(inputFileElement.files[0]);
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSignupSubmit = async (event: React.FormEvent) => {
     try {
       event.preventDefault();
       await signup({ variables: { username, password, password_confirm: passwordConfirm } });
@@ -71,7 +71,7 @@ function SignupPage() {
           sx={{
             display: 'flex', flexDirection: 'column', gap: '16px', padding: { xs: '24px', sm: '32px' }, width: { xs: 'fit-content', sm: '340px' },
           }}
-          onSubmit={handleSubmit}
+          onSubmit={handleSignupSubmit}
         >
           <TextField
             id='input-username'

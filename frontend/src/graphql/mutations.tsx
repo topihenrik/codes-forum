@@ -8,7 +8,6 @@ export const CREATE_USER = gql(/* GraphQL */`
       password_confirm: $password_confirm
     ) {
       _id
-      username
     }
   }
 `);
@@ -31,8 +30,17 @@ export const CREATE_POST = gql(/* GraphQL */`
       body: $body
     ) {
       _id
-      title
-      body
+    }
+  }
+`);
+
+export const CREATE_COMMENT = gql(/* GraphQL */`
+  mutation createComment($body: String!, $post: String!) {
+    createComment(
+      body: $body
+      post: $post
+    ) {
+      _id
     }
   }
 `);

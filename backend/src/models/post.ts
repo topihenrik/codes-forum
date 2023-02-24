@@ -18,8 +18,6 @@ const PostSchema = new Schema<IPost>(
     author: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
     votes: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
     voteCount: { type: Number, default: 0 },
-    /* createdAt: { type: Date },
-    updatedAt: { type: Date }, */
   },
   {
     timestamps: true,

@@ -22,7 +22,6 @@
     ],
     "rules": {
         "no-console": "off",
-        "no-param-reassign": "off",
         "no-underscore-dangle": "off",
         "import/extensions": "off",
         "linebreak-style": ["warn", "windows"]

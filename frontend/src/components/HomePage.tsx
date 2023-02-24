@@ -76,8 +76,106 @@ function PostCard({ post }: PostCardProps) {
   );
 }
 
-function HomePage() {
+function PostsList() {
   const result = useQuery(GET_POSTS);
+  /* const result = {
+    data: {
+      posts: false,
+    },
+    error: false,
+    loading: true,
+  }; */
+
+  if (result.error) {
+    return (
+      <Box>
+        <Typography>
+          Errors
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (result.loading) {
+    return (
+      <Box>
+        <ContentLoader
+          style={{ width: '100%', height: '100%' }}
+          viewBox='0 0 640 840'
+          backgroundColor='#262626'
+          foregroundColor='#2a2a2a'
+        >
+          <rect
+            x='0'
+            y='0'
+            rx='5'
+            ry='5'
+            width='640'
+            height='155'
+          />
+          <rect
+            x='0'
+            y='171'
+            rx='5'
+            ry='5'
+            width='640'
+            height='155'
+          />
+          <rect
+            x='0'
+            y='342'
+            rx='5'
+            ry='5'
+            width='640'
+            height='155'
+          />
+          <rect
+            x='0'
+            y='513'
+            rx='5'
+            ry='5'
+            width='640'
+            height='155'
+          />
+          <rect
+            x='0'
+            y='684'
+            rx='5'
+            ry='5'
+            width='640'
+            height='155'
+          />
+        </ContentLoader>
+      </Box>
+    );
+  }
+
+  if ((!(result?.data?.posts))) {
+    return (
+      <Box>
+        <Typography>
+          No posts
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{
+      display: 'flex', flexDirection: 'column', gap: '16px',
+    }}
+    >
+      {result.data.posts.map((post) => (
+        <PostCard
+          key={post._id}
+          post={post}
+        />
+      ))}
+    </Box>
+  );
+}
+
+function HomePage() {
   return (
     <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box sx={{
@@ -89,14 +187,16 @@ function HomePage() {
         }}
         >
           <Typography
+            variant='h4'
+            sx={{ color: 'black', fontWeight: '700', fontFamily: 'Roboto Condensed' }}
+          >
+            Having problems?
+          </Typography>
+          <Typography
             variant='h3'
             sx={{ color: 'black', fontWeight: '700', fontFamily: 'Roboto Condensed' }}
           >
-            Any problem can be solved with
-            {' '}
-            <span style={{ textDecoration: 'underline', textEmphasisColor: 'white' }}>
-              DebugIt!
-            </span>
+            Just DebugIt!
           </Typography>
         </Box>
         <Link
@@ -109,43 +209,7 @@ function HomePage() {
             Ask Question
           </Button>
         </Link>
-        <Box sx={{
-          display: 'flex', flexDirection: 'column', gap: '16px',
-        }}
-        >
-          { result.loading || (!(result?.data?.posts)) ? (
-            <ContentLoader
-              style={{ height: '285px', width: '256px' }}
-              viewBox='0 0 256 290'
-              backgroundColor='#262626'
-              foregroundColor='#2a2a2a'
-            >
-              <rect
-                x='0'
-                y='0'
-                rx='5'
-                ry='5'
-                width='256'
-                height='256'
-              />
-              <rect
-                x='28'
-                y='260'
-                rx='5'
-                ry='5'
-                width='200'
-                height='30'
-              />
-            </ContentLoader>
-          ) : (
-            result.data.posts.map((post) => (
-              <PostCard
-                key={post._id}
-                post={post}
-              />
-            ))
-          )}
-        </Box>
+        <PostsList />
       </Box>
     </Container>
   );
