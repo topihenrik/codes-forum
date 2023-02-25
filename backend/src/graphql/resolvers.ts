@@ -22,6 +22,7 @@ const resolvers: Resolvers = {
     posts: async () => Post.find({}),
     post: async (root, args) => Post.findById(args._id),
     comments: async (root, args) => Comment.find({ post: args.post }),
+    comment: async (root, args) => Comment.findById(args._id),
   },
   Mutation: {
     createUser: async (root, args) => {
@@ -105,6 +106,25 @@ const resolvers: Resolvers = {
         },
       );
       return newComment.save() as Promise<CommentType>;
+    },
+    editComment: async (root, args, context) => {
+      if (!context.currentUser) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const oldComment = await Comment.findById(args._id);
+
+      if (!oldComment) {
+        throw new GraphQLError('comment doesn\'t exist', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      if (oldComment.author.toString() !== context.currentUser._id.toString()) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      oldComment.body = args.body;
+
+      return oldComment.save() as Promise<CommentType>;
     },
   },
 };

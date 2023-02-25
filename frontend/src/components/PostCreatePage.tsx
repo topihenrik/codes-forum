@@ -53,12 +53,14 @@ function PostCreatePage() {
     },
   );
 
+  // After succesful post creation -> Navigate to the post site
   useEffect(() => {
-    if (result.data) {
-      navigate('/');
+    if (result.data?.createPost) {
+      navigate(`/post/${result.data.createPost._id}`);
     }
   }, [result.data, navigate]);
 
+  // If post creation fails in the backend -> Inform the user about issues
   useEffect(() => {
     if (result.error) {
       if (result.error.networkError) { // parse network error message

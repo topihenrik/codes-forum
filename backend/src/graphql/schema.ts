@@ -37,6 +37,7 @@ const typeDefs = gql`
         posts: [Post!]
         post(_id: String!): Post
         comments(post: String!): [Comment!]
+        comment(_id: String!): Comment
     }
 
     type Mutation {
@@ -61,6 +62,10 @@ const typeDefs = gql`
         createComment(
             body: String!
             post: String!
+        ): Comment
+        editComment(
+            _id: String!
+            body: String!
         ): Comment
     }
 `;

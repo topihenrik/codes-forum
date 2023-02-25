@@ -50,6 +50,7 @@ function PostEditPage() {
   const [error, setError] = useState<IError | null >(null);
   const decodedToken = useReactiveVar(decodedTokenVar);
   const postid = useParams().id || '';
+
   const oldPostResult = useQuery(GET_POST, {
     variables: {
       _id: postid,
@@ -88,12 +89,14 @@ function PostEditPage() {
     }
   }, [oldPostResult.data, setEditorState]);
 
+  // After succesful post edit -> Navigate back to post site
   useEffect(() => {
     if (editResult.data) {
-      navigate('/');
+      navigate(`/post/${postid}`);
     }
-  }, [editResult.data, navigate]);
+  }, [editResult.data, postid, navigate]);
 
+  // If post update fails in the backend -> Inform the user about issues
   useEffect(() => {
     if (editResult.error) {
       if (editResult.error.networkError) { // parse network error message

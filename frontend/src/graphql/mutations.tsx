@@ -56,3 +56,14 @@ export const CREATE_COMMENT = gql(/* GraphQL */`
     }
   }
 `);
+
+export const EDIT_COMMENT = gql(/* GraphQL */`
+  mutation editComment($_id: String!, $body: String!) {
+    editComment(
+      _id: $_id
+      body: $body
+    ) {
+      _id
+    }
+  }
+`);

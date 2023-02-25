@@ -3,23 +3,23 @@ import {
   ServerError, useMutation, useQuery, useReactiveVar,
 } from '@apollo/client';
 import {
-  Container, Box, Typography, Paper, Link, Button, Divider, Avatar,
+  Container, Box, Typography, Paper, Link, Button, Divider, Avatar, ButtonBase,
 } from '@mui/material';
 import DOMPurify from 'dompurify';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { DateTime } from 'luxon';
-import { convertToRaw, EditorState } from 'draft-js';
+import { convertFromRaw, convertToRaw, EditorState } from 'draft-js';
 import ContentLoader from 'react-content-loader';
 import draftToHtml from 'draftjs-to-html';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { GET_COMMENTS, GET_POST } from '../graphql/queries';
+import { GET_COMMENT, GET_COMMENTS, GET_POST } from '../graphql/queries';
 import { type Comment } from '../__generated__/graphql';
 import { errorVar, decodedTokenVar } from '../cache';
 import DraftEditor from './DraftEditor';
-import { CREATE_COMMENT } from '../graphql/mutations';
+import { CREATE_COMMENT, EDIT_COMMENT } from '../graphql/mutations';
 import Notification from './Notification';
 
 function FullPost() {
@@ -79,7 +79,9 @@ function FullPost() {
   const cleanBody = post.body ? DOMPurify.sanitize(draftToHtml(JSON.parse((post.body)))) : '';
 
   return (
-    <>
+    <Box
+      className='post'
+    >
       <Paper sx={{
         backgroundColor: 'primary.dark', borderBottomLeftRadius: '0', borderBottomRightRadius: '0', padding: { xs: '8px', sm: '16px' }, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '8px',
       }}
@@ -131,7 +133,7 @@ function FullPost() {
                 </Box>
               </Box>
             )}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
                 <Typography sx={{ fontSize: '0.8rem' }}>
                   Asked&nbsp;
@@ -168,7 +170,122 @@ function FullPost() {
           </Box>
         </Box>
       </Box>
-    </>
+    </Box>
+  );
+}
+
+interface ICommentEditProps {
+  commentId: string
+  setEditing: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
+  const postid = useParams().id || '';
+  const oldCommentResult = useQuery(GET_COMMENT, {
+    variables: {
+      _id: commentId,
+    },
+  });
+  const [editComment, editResult] = useMutation(EDIT_COMMENT, {
+    refetchQueries: [{ query: GET_COMMENTS, variables: { post: postid } }],
+  });
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const decodedToken = useReactiveVar(decodedTokenVar);
+  const [error, setError] = useState<IError | null >(null);
+
+  // After fetching data from the backend -> Set Editor content state.
+  useEffect(() => {
+    if (oldCommentResult?.data?.comment?.body) {
+      const oldContentState = convertFromRaw(JSON.parse(oldCommentResult.data.comment.body));
+      setEditorState(EditorState.createWithContent(oldContentState));
+    }
+  }, [oldCommentResult.data, setEditorState]);
+
+  // After succesful edit -> Close Editor
+  useEffect(() => {
+    if (editResult.data) {
+      setEditing(false);
+    }
+  }, [editResult.data, setEditing]);
+
+  // If comment update fails in the backend -> Inform about issues to the user
+  useEffect(() => {
+    if (editResult.error) {
+      if (editResult.error.networkError) { // parse network error message
+        const netError = editResult.error.networkError as ServerError;
+        setError({ message: netError.result.errors[0].message });
+      } else { // parse graphql error message
+        setError({ message: editResult.error.message });
+      }
+    }
+  }, [editResult.error]);
+
+  const handleEditorChange = (newEditorState: EditorState) => {
+    setEditorState(newEditorState);
+  };
+
+  const handleCommentSubmit = async () => {
+    if (editorState.getCurrentContent().getPlainText().length <= 10) {
+      setError({ message: 'Comment too short. Minimum length: 10' });
+      return;
+    }
+
+    try {
+      await editComment(
+        {
+          variables: {
+            _id: commentId,
+            body: JSON.stringify(convertToRaw(editorState.getCurrentContent())),
+          },
+        },
+      );
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  };
+
+  return (
+    <Box
+      className='comment-edit'
+      sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+    >
+      <Typography
+        variant='h6'
+        sx={{ textAlign: 'center' }}
+      >
+        Edit Your Answer
+      </Typography>
+      <DraftEditor
+        name='comment'
+        editorState={editorState}
+        onEditorStateChange={handleEditorChange}
+      />
+      {error && <Notification message={error.message} />}
+      <Box sx={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '8px',
+      }}
+      >
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+          <Button
+            variant='contained'
+            onClick={handleCommentSubmit}
+          >
+            Update
+          </Button>
+          <Button
+            variant='outlined'
+            onClick={() => { setEditing(false); }}
+          >
+            Cancel
+          </Button>
+        </Box>
+        <Typography>
+          author: @
+          {decodedToken && decodedToken.username}
+        </Typography>
+      </Box>
+    </Box>
   );
 }
 
@@ -177,9 +294,24 @@ interface IFullCommentProps {
 }
 
 function FullComment({ comment }: IFullCommentProps) {
+  const [editing, setEditing] = useState(false);
+  const decodedToken = useReactiveVar(decodedTokenVar);
   const cleanBody = comment.body ? DOMPurify.sanitize(draftToHtml(JSON.parse(comment.body))) : '';
+
+  if (editing) {
+    return (
+      <CommentEdit
+        commentId={comment._id || ''}
+        setEditing={setEditing}
+      />
+    );
+  }
+
   return (
-    <Box sx={{ display: 'flex', gap: { xs: '4px', sm: '8px' }, padding: '8px 0' }}>
+    <Box
+      className='comment-full'
+      sx={{ display: 'flex', gap: { xs: '4px', sm: '8px' }, padding: '8px 0' }}
+    >
       <Box sx={{
         display: 'flex', flexDirection: 'column', gap: '32px',
       }}
@@ -204,23 +336,29 @@ function FullComment({ comment }: IFullCommentProps) {
           dangerouslySetInnerHTML={{ __html: cleanBody }}
         />
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography sx={{ fontSize: '0.8rem' }}>
-                Edit
-                {' '}
-              </Typography>
-              <EditIcon sx={{ width: '24px', height: '24px' }} />
+          {(decodedToken?._id === comment.author?._id) && (
+            <Box sx={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <ButtonBase
+                  onClick={() => { setEditing(true); }}
+                >
+                  <Typography sx={{ fontSize: '0.8rem' }}>
+                    Edit
+                    {' '}
+                  </Typography>
+                  <EditIcon sx={{ width: '24px', height: '24px' }} />
+                </ButtonBase>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography sx={{ fontSize: '0.8rem' }}>
+                  Delete
+                  {' '}
+                </Typography>
+                <DeleteIcon sx={{ width: '24px', height: '24px' }} />
+              </Box>
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography sx={{ fontSize: '0.8rem' }}>
-                Delete
-                {' '}
-              </Typography>
-              <DeleteIcon sx={{ width: '24px', height: '24px' }} />
-            </Box>
-          </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          )}
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
               <Typography sx={{ fontSize: '0.8rem' }}>
                 Answered&nbsp;
@@ -345,7 +483,7 @@ interface IError {
   message: string
 }
 
-function CommentEditor() {
+function CommentCreate() {
   const postid = useParams().id || '';
   const [createComment, result] = useMutation(CREATE_COMMENT, {
     refetchQueries: [{ query: GET_COMMENTS, variables: { post: postid } }],
@@ -354,11 +492,13 @@ function CommentEditor() {
   const decodedToken = useReactiveVar(decodedTokenVar);
   const [error, setError] = useState<IError | null >(null);
 
+  // After succesful comment creation -> Empty Editor content and Error messages
   useEffect(() => {
     setEditorState(EditorState.createEmpty());
     setError(null);
   }, [result.data]);
 
+  // If comment creation fails in the backend -> Inform about issues to the user
   useEffect(() => {
     if (result.error) {
       if (result.error.networkError) { // parse network error message
@@ -414,7 +554,10 @@ function CommentEditor() {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <Box
+      className='comment-create'
+      sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+    >
       <Typography
         variant='h6'
         sx={{ textAlign: 'center' }}
@@ -460,7 +603,7 @@ function CommentSection() {
       </Typography>
       <CommentsList />
       <Divider />
-      <CommentEditor />
+      <CommentCreate />
     </Box>
   );
 }

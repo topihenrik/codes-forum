@@ -36,9 +36,10 @@ describe('app core functionality', () => {
     cy.get('#input-title').type("I need help with a problem!");
     cy.get('.draftjs-editor.rdw-editor-main').type("My test file contains 5 tests. Is that possible to run a specific test rather than all the tests in the file?");
     cy.contains('Submit').click();
-    cy.contains("Just DebugIt!");
-    cy.contains('I need help with a problem!').click();
     cy.contains('I need help with a problem!');
+    cy.contains('Edit');
+    cy.contains('Delete');
+    cy.contains("Asked");
     cy.contains('My test file contains 5 tests. Is that possible to run a specific test rather than all the tests in the file?');
   });
   it('create a comment to a post and view it', () => {
@@ -70,9 +71,33 @@ describe('app core functionality', () => {
     cy.get('#input-title').type("?!");
     cy.get('.draftjs-editor.rdw-editor-main').type('{moveToEnd}').type("!?");
     cy.contains('Update').click();
+    cy.contains('I need help with a problem!?!');
+    cy.contains('Edit');
+    cy.contains('Delete');
+    cy.contains("Asked");
+    cy.contains('My test file contains 5 tests. Is that possible to run a specific test rather than all the tests in the file?!?');
+  });
+  it('edit a comment and view it', () => {
+    cy.visit("http://localhost:4173/");
+    cy.get("#link-login-desktop").click();
+    cy.get('#input-username').type('pertsa82');
+    cy.get('#input-password').type('jes123');
+    cy.get('#btn-login').click();
     cy.contains("Just DebugIt!");
     cy.contains('I need help with a problem!?!').click();
     cy.contains('I need help with a problem!?!');
     cy.contains('My test file contains 5 tests. Is that possible to run a specific test rather than all the tests in the file?!?');
+    cy.get('.comment-full').within(() => cy.contains('Edit').click());
+    cy.get('.comment-edit').within(() => {
+      cy.get('.draftjs-editor.rdw-editor-main').type('{moveToEnd}').type("..");
+      cy.contains('Update').click();
+    });
+    cy.get('.comment-full').within(() => {
+      cy.contains("To solve the problem you need to restart the computer...");
+      cy.contains('Edit');
+      cy.contains('Delete');
+      cy.contains('Answered');
+      cy.contains('Modified');
+    });
   })
 });
