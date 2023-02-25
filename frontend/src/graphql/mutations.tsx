@@ -34,6 +34,18 @@ export const CREATE_POST = gql(/* GraphQL */`
   }
 `);
 
+export const EDIT_POST = gql(/* GraphQL */`
+  mutation editPost($_id: String!, $title: String!, $body: String!) {
+    editPost(
+      _id: $_id
+      title: $title
+      body: $body
+    ) {
+      _id
+    }
+  }
+`);
+
 export const CREATE_COMMENT = gql(/* GraphQL */`
   mutation createComment($body: String!, $post: String!) {
     createComment(

@@ -53,6 +53,11 @@ const typeDefs = gql`
             title: String!
             body: String!
         ): Post
+        editPost(
+            _id: String!
+            title: String!
+            body: String!
+        ): Post
         createComment(
             body: String!
             post: String!

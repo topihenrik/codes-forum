@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useReactiveVar } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
-import { tokenVar } from '../cache';
+import { decodedTokenVar } from '../cache';
 
 interface Props {
   children: JSX.Element
@@ -9,14 +9,14 @@ interface Props {
 
 // checks whether the user has a token. if not then redirected to login page
 function ProtectedRoute({ children }: Props) {
-  const token = useReactiveVar(tokenVar);
+  const decodedToken = useReactiveVar(decodedTokenVar);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!token) {
+    if (!decodedToken) {
       navigate('/login', { replace: true });
     }
-  }, [token, navigate]);
+  }, [decodedToken, navigate]);
 
   return children;
 }

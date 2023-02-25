@@ -2,17 +2,20 @@ import {
   Container, Box, Paper, TextField,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { convertToRaw, EditorState } from 'draft-js';
+import { convertToRaw, convertFromRaw, EditorState } from 'draft-js';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { ServerError, useMutation, useReactiveVar } from '@apollo/client';
-import { decodedTokenVar } from '../cache';
+import ContentLoader from 'react-content-loader';
+import {
+  ServerError, useMutation, useQuery, useReactiveVar,
+} from '@apollo/client';
+import { errorVar, decodedTokenVar } from '../cache';
 import DraftEditor from './DraftEditor';
-import { CREATE_POST } from '../graphql/mutations';
-import { GET_POSTS } from '../graphql/queries';
+import { EDIT_POST } from '../graphql/mutations';
+import { GET_POSTS, GET_POST } from '../graphql/queries';
 import Notification from './Notification';
 
 const TitleTextField = styled(TextField)({
@@ -40,35 +43,67 @@ interface IError {
   message: string
 }
 
-function PostCreatePage() {
+function PostEditPage() {
   const [title, setTitle] = useState('');
   const navigate = useNavigate();
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const [error, setError] = useState<IError | null >(null);
   const decodedToken = useReactiveVar(decodedTokenVar);
-  const [createPost, result] = useMutation(
-    CREATE_POST,
+  const postid = useParams().id || '';
+  const oldPostResult = useQuery(GET_POST, {
+    variables: {
+      _id: postid,
+    },
+  });
+  const [editPost, editResult] = useMutation(
+    EDIT_POST,
     {
-      refetchQueries: [{ query: GET_POSTS }],
+      refetchQueries: [{ query: GET_POSTS }, { query: GET_POST, variables: { _id: postid } }],
     },
   );
 
   useEffect(() => {
-    if (result.data) {
-      navigate('/');
-    }
-  }, [result.data, navigate]);
-
-  useEffect(() => {
-    if (result.error) {
-      if (result.error.networkError) { // parse network error message
-        const netError = result.error.networkError as ServerError;
-        setError({ message: netError.result.errors[0].message });
-      } else { // parse graphql error message
-        setError({ message: result.error.message });
+    if (!oldPostResult.loading) {
+      // Loading is complete
+      if (!(oldPostResult?.data?.post?.author)) {
+        // Post was not found -> Post 404
+        errorVar('Post not found');
+        navigate('/error', { replace: true });
+        // return;
+      } else if (oldPostResult.data.post.author._id !== decodedToken?._id) {
+        // Post author doesn't match the current user -> Unauthorized
+        errorVar('Unauthorized');
+        navigate('/error', { replace: true });
       }
     }
-  }, [result.error]);
+  }, [oldPostResult, navigate, decodedToken]);
+
+  useEffect(() => {
+    if (oldPostResult?.data?.post?.body) {
+      const oldContentState = convertFromRaw(JSON.parse(oldPostResult.data.post.body));
+      setEditorState(EditorState.createWithContent(oldContentState));
+    }
+    if (oldPostResult?.data?.post?.title) {
+      setTitle(oldPostResult.data.post.title);
+    }
+  }, [oldPostResult.data, setEditorState]);
+
+  useEffect(() => {
+    if (editResult.data) {
+      navigate('/');
+    }
+  }, [editResult.data, navigate]);
+
+  useEffect(() => {
+    if (editResult.error) {
+      if (editResult.error.networkError) { // parse network error message
+        const netError = editResult.error.networkError as ServerError;
+        setError({ message: netError.result.errors[0].message });
+      } else { // parse graphql error message
+        setError({ message: editResult.error.message });
+      }
+    }
+  }, [editResult.error]);
 
   const handleEditorChange = (newEditorState: EditorState) => {
     setEditorState(newEditorState);
@@ -86,9 +121,10 @@ function PostCreatePage() {
     }
 
     try {
-      await createPost(
+      await editPost(
         {
           variables: {
+            _id: postid,
             title,
             body: JSON.stringify(convertToRaw(editorState.getCurrentContent())),
           },
@@ -99,6 +135,40 @@ function PostCreatePage() {
       console.error(err);
     }
   };
+
+  if (oldPostResult.loading) {
+    return (
+      <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Box sx={{
+          display: 'flex', flexDirection: 'column', gap: '8px', width: 'clamp(300px, 50%, 768px)',
+        }}
+        >
+          <ContentLoader
+            viewBox='0 0 576 512'
+            backgroundColor='#262626'
+            foregroundColor='#2a2a2a'
+          >
+            <rect
+              x='16'
+              y='16'
+              rx='5'
+              ry='5'
+              width='544'
+              height='80'
+            />
+            <rect
+              x='16'
+              y='128'
+              rx='5'
+              ry='5'
+              width='544'
+              height='368'
+            />
+          </ContentLoader>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -113,7 +183,7 @@ function PostCreatePage() {
             }}
           >
             <Typography variant='h4'>
-              Ask A New Question
+              Edit Your Question
             </Typography>
           </Paper>
           <Box sx={{ backgroundColor: '#FFF' }}>
@@ -144,7 +214,7 @@ function PostCreatePage() {
               variant='contained'
               onClick={handlePostSubmit}
             >
-              Submit
+              Update
             </Button>
             <Typography>
               author: @
@@ -157,4 +227,4 @@ function PostCreatePage() {
   );
 }
 
-export default PostCreatePage;
+export default PostEditPage;

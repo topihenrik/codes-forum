@@ -13,15 +13,17 @@ import { convertToRaw, EditorState } from 'draft-js';
 import ContentLoader from 'react-content-loader';
 import draftToHtml from 'draftjs-to-html';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { GET_COMMENTS, GET_POST } from '../graphql/queries';
 import { type Comment } from '../__generated__/graphql';
-import { tokenVar, errorVar } from '../cache';
+import { errorVar, decodedTokenVar } from '../cache';
 import DraftEditor from './DraftEditor';
-import { decodeToken, IDecodedToken } from '../utils';
 import { CREATE_COMMENT } from '../graphql/mutations';
 import Notification from './Notification';
 
 function FullPost() {
+  const decodedToken = useReactiveVar(decodedTokenVar);
   const navigate = useNavigate();
   const postId = useParams().id || '';
   const result = useQuery(GET_POST, {
@@ -106,25 +108,59 @@ function FullPost() {
             dangerouslySetInnerHTML={{ __html: cleanBody }}
           />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography sx={{ fontSize: '0.9rem' }}>
-              Asked
-              {' '}
-              {DateTime.fromJSDate(new Date(post.createdAt)).toLocaleString(DateTime.DATE_MED)}
-            </Typography>
-            {post.createdAt !== post.updatedAt && (
-            <Typography sx={{ fontSize: '0.9rem' }}>
-              Modified
-              {' '}
-              {DateTime.fromJSDate(new Date(post.updatedAt)).toLocaleString(DateTime.DATE_MED)}
-            </Typography>
+            {(decodedToken?._id === post.author?._id) && (
+              <Box sx={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <Link
+                  id='link-edit-post'
+                  sx={{ display: 'flex', alignItems: 'center', color: 'inherit' }}
+                  component={RouterLink}
+                  to={`/post/edit/${postId}`}
+                >
+                  <Typography sx={{ fontSize: '0.8rem' }}>
+                    Edit
+                    {' '}
+                  </Typography>
+                  <EditIcon sx={{ width: '24px', height: '24px' }} />
+                </Link>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Typography sx={{ fontSize: '0.8rem' }}>
+                    Delete
+                    {' '}
+                  </Typography>
+                  <DeleteIcon sx={{ width: '24px', height: '24px' }} />
+                </Box>
+              </Box>
             )}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
+                <Typography sx={{ fontSize: '0.8rem' }}>
+                  Asked&nbsp;
+                </Typography>
+                <Typography sx={{ fontSize: '0.8rem' }}>
+                  {DateTime.fromJSDate(new Date(post.createdAt)).toLocaleString(DateTime.DATE_MED)}
+                </Typography>
+              </Box>
+              {post.createdAt !== post.updatedAt && (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
+                <Typography sx={{ fontSize: '0.8rem' }}>
+                  Modified&nbsp;
+                </Typography>
+                <Typography sx={{ fontSize: '0.8rem' }}>
+                  {DateTime.fromJSDate(new Date(post.updatedAt)).toLocaleString(DateTime.DATE_MED)}
+                </Typography>
+              </Box>
+              )}
+            </Box>
+            <Box sx={{
+              display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap',
+            }}
+            >
               <Avatar
                 sx={{ height: '24px', width: '24px', borderRadius: '16px' }}
                 alt='avatar'
                 src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
               />
-              <Typography>
+              <Typography sx={{ fontSize: '0.9rem' }}>
                 @
                 {post.author?.username}
               </Typography>
@@ -145,14 +181,19 @@ function FullComment({ comment }: IFullCommentProps) {
   return (
     <Box sx={{ display: 'flex', gap: { xs: '4px', sm: '8px' }, padding: '8px 0' }}>
       <Box sx={{
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 'fit-content',
+        display: 'flex', flexDirection: 'column', gap: '32px',
       }}
       >
-        <ArrowUpwardIcon />
-        <Typography>
-          {comment.voteCount}
-        </Typography>
-        <ArrowDownwardIcon />
+        <Box sx={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'fit-content',
+        }}
+        >
+          <ArrowUpwardIcon />
+          <Typography>
+            {comment.voteCount}
+          </Typography>
+          <ArrowDownwardIcon />
+        </Box>
       </Box>
       <Box sx={{
         display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%',
@@ -163,25 +204,52 @@ function FullComment({ comment }: IFullCommentProps) {
           dangerouslySetInnerHTML={{ __html: cleanBody }}
         />
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography sx={{ fontSize: '0.9rem' }}>
-            Answered
-            {' '}
-            {DateTime.fromJSDate(new Date(comment.createdAt)).toLocaleString(DateTime.DATE_MED)}
-          </Typography>
-          {comment.createdAt !== comment.updatedAt && (
-          <Typography sx={{ fontSize: '0.9rem' }}>
-            Modified
-            {' '}
-            {DateTime.fromJSDate(new Date(comment.updatedAt)).toLocaleString(DateTime.DATE_MED)}
-          </Typography>
-          )}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Box sx={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography sx={{ fontSize: '0.8rem' }}>
+                Edit
+                {' '}
+              </Typography>
+              <EditIcon sx={{ width: '24px', height: '24px' }} />
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography sx={{ fontSize: '0.8rem' }}>
+                Delete
+                {' '}
+              </Typography>
+              <DeleteIcon sx={{ width: '24px', height: '24px' }} />
+            </Box>
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
+              <Typography sx={{ fontSize: '0.8rem' }}>
+                Answered&nbsp;
+              </Typography>
+              <Typography sx={{ fontSize: '0.8rem' }}>
+                {DateTime.fromJSDate(new Date(comment.createdAt)).toLocaleString(DateTime.DATE_MED)}
+              </Typography>
+            </Box>
+            {comment.createdAt !== comment.updatedAt && (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
+              <Typography sx={{ fontSize: '0.8rem' }}>
+                Modified&nbsp;
+              </Typography>
+              <Typography sx={{ fontSize: '0.8rem' }}>
+                {DateTime.fromJSDate(new Date(comment.updatedAt)).toLocaleString(DateTime.DATE_MED)}
+              </Typography>
+            </Box>
+            )}
+          </Box>
+          <Box sx={{
+            display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap',
+          }}
+          >
             <Avatar
               sx={{ height: '24px', width: '24px', borderRadius: '16px' }}
               alt='avatar'
               src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
             />
-            <Typography>
+            <Typography sx={{ fontSize: '0.9rem' }}>
               @
               {comment.author?.username}
             </Typography>
@@ -283,13 +351,8 @@ function CommentEditor() {
     refetchQueries: [{ query: GET_COMMENTS, variables: { post: postid } }],
   });
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
-  const token = useReactiveVar(tokenVar);
-  const [decodedToken, setDecodedToken] = useState<IDecodedToken | null>(null);
+  const decodedToken = useReactiveVar(decodedTokenVar);
   const [error, setError] = useState<IError | null >(null);
-
-  useEffect(() => {
-    setDecodedToken(decodeToken(token));
-  }, [token]);
 
   useEffect(() => {
     setEditorState(EditorState.createEmpty());
@@ -332,7 +395,7 @@ function CommentEditor() {
     }
   };
 
-  if (!token) {
+  if (!decodedToken) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         <Link

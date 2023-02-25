@@ -16,6 +16,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ProfilePage from './components/ProfilePage';
 import PostCreatePage from './components/PostCreatePage';
 import PostPage from './components/PostPage';
+import PostEditPage from './components/PostEditPage';
 import ErrorPage from './components/ErrorPage';
 
 const client = new ApolloClient(
@@ -63,6 +64,14 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
             element={(
               <ProtectedRoute>
                 <PostCreatePage />
+              </ProtectedRoute>
+            )}
+          />
+          <Route
+            path='/post/edit/:id'
+            element={(
+              <ProtectedRoute>
+                <PostEditPage />
               </ProtectedRoute>
             )}
           />

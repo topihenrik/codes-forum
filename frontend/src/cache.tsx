@@ -1,6 +1,7 @@
 import { InMemoryCache, makeVar } from '@apollo/client';
+import { decodeToken, type IDecodedToken } from './utils';
 
-export const tokenVar = makeVar<null | string>(localStorage.getItem('auth_token'));
+export const decodedTokenVar = makeVar<null | IDecodedToken>(decodeToken(localStorage.getItem('auth_token')));
 export const errorVar = makeVar<string>('');
 
 // Apollo Client configuration
@@ -8,9 +9,9 @@ const cache = new InMemoryCache({
   typePolicies: {
     Query: {
       fields: {
-        token: {
+        decodedToken: {
           read() {
-            return tokenVar();
+            return decodedTokenVar();
           },
         },
         error: {

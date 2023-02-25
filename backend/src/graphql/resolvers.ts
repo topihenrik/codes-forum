@@ -72,6 +72,26 @@ const resolvers: Resolvers = {
       );
       return newPost.save() as Promise<PostType>;
     },
+    editPost: async (root, args, context) => {
+      if (!context.currentUser) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const oldPost = await Post.findById(args._id);
+
+      if (!oldPost) {
+        throw new GraphQLError('post doesn\'t exist', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      if (oldPost.author.toString() !== context.currentUser._id.toString()) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      oldPost.title = args.title;
+      oldPost.body = args.body;
+
+      return oldPost.save() as Promise<PostType>;
+    },
     createComment: async (root, args, context) => {
       if (!context.currentUser) {
         throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });

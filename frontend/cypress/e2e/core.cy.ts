@@ -29,7 +29,7 @@ describe('app core functionality', () => {
     cy.visit("http://localhost:4173/");
     cy.get("#link-login-desktop").click();
     cy.get('#input-username').type('pertsa82');
-    cy.get('#input-password').clear().type('jes123');
+    cy.get('#input-password').type('jes123');
     cy.get('#btn-login').click();
     cy.contains("Just DebugIt!");
     cy.contains('Ask Question').click();
@@ -45,7 +45,7 @@ describe('app core functionality', () => {
     cy.visit("http://localhost:4173/");
     cy.get("#link-login-desktop").click();
     cy.get('#input-username').type('pertsa82');
-    cy.get('#input-password').clear().type('jes123');
+    cy.get('#input-password').type('jes123');
     cy.get('#btn-login').click();
     cy.contains("Just DebugIt!");
     cy.contains('I need help with a problem!').click();
@@ -56,4 +56,23 @@ describe('app core functionality', () => {
     cy.reload();
     cy.get(".comment").contains("To solve the problem you need to restart the computer.");
   });
+  it('edit a post and view it', () => {
+    cy.visit("http://localhost:4173/");
+    cy.get("#link-login-desktop").click();
+    cy.get('#input-username').type('pertsa82');
+    cy.get('#input-password').type('jes123');
+    cy.get('#btn-login').click();
+    cy.contains("Just DebugIt!");
+    cy.contains('I need help with a problem!').click();
+    cy.contains('I need help with a problem!');
+    cy.contains('My test file contains 5 tests. Is that possible to run a specific test rather than all the tests in the file?');
+    cy.get("#link-edit-post").click();
+    cy.get('#input-title').type("?!");
+    cy.get('.draftjs-editor.rdw-editor-main').type('{moveToEnd}').type("!?");
+    cy.contains('Update').click();
+    cy.contains("Just DebugIt!");
+    cy.contains('I need help with a problem!?!').click();
+    cy.contains('I need help with a problem!?!');
+    cy.contains('My test file contains 5 tests. Is that possible to run a specific test rather than all the tests in the file?!?');
+  })
 });
