@@ -49,7 +49,7 @@ function Header() {
                   id='link-profile-desktop'
                   sx={{ color: 'inherit', textDecoration: 'none' }}
                   component={RouterLink}
-                  to='/profile/test'
+                  to={`/profile/${decodedToken._id}`}
                 >
                   <Button>
                     <Typography variant='button'>Profile</Typography>
@@ -118,7 +118,7 @@ function Header() {
                 <Link
                   sx={{ color: 'inherit', textDecoration: 'none' }}
                   component={RouterLink}
-                  to='/profile'
+                  to={`/profile/${decodedToken._id}`}
                 >
                   <ListItem>
                     <ListItemButton onClick={() => { setDrawer(false); }}>

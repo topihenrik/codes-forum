@@ -162,10 +162,16 @@ function FullPost() {
                 alt='avatar'
                 src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
               />
-              <Typography sx={{ fontSize: '0.9rem' }}>
-                @
-                {post.author?.username}
-              </Typography>
+              <Link
+                sx={{ color: 'inherit' }}
+                component={RouterLink}
+                to={`/profile/${post.author?._id}`}
+              >
+                <Typography sx={{ fontSize: '0.9rem' }}>
+                  @
+                  {post.author?.username}
+                </Typography>
+              </Link>
             </Box>
           </Box>
         </Box>
@@ -387,10 +393,16 @@ function FullComment({ comment }: IFullCommentProps) {
               alt='avatar'
               src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
             />
-            <Typography sx={{ fontSize: '0.9rem' }}>
-              @
-              {comment.author?.username}
-            </Typography>
+            <Link
+              sx={{ color: 'inherit' }}
+              component={RouterLink}
+              to={`/profile/${comment.author?._id}`}
+            >
+              <Typography sx={{ fontSize: '0.9rem' }}>
+                @
+                {comment.author?.username}
+              </Typography>
+            </Link>
           </Box>
         </Box>
       </Box>

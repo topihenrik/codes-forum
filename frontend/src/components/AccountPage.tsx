@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import ContentLoader from 'react-content-loader';
 import {
-  Box, Button, Container, Typography, Paper, TextField, Avatar,
+  Box, Button, Container, Typography, Paper, TextField, Avatar, Link,
 } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import { useQuery } from '@apollo/client';
 import { GET_ACCOUNT } from '../graphql/queries';
@@ -205,12 +206,18 @@ function AccountPage() {
                     alt='avatar'
                     src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
                   />
-                  <Typography>
-                    @
-                    {result.data?.account?.username}
-                    {' '}
-                    - Your Profile
-                  </Typography>
+                  <Link
+                    sx={{ color: 'inherit' }}
+                    component={RouterLink}
+                    to={`/profile/${result.data?.account?._id}`}
+                  >
+                    <Typography>
+                      @
+                      {result.data?.account?.username}
+                      {' '}
+                      - Your Profile
+                    </Typography>
+                  </Link>
                 </>
               )}
             </Box>

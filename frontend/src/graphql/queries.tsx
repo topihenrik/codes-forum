@@ -10,6 +10,39 @@ export const GET_ACCOUNT = gql(/* GraphQL */`
   }
 `);
 
+export const GET_PROFILE = gql(/* GraphQL */`
+  query profile($_id: String!) {
+    profile(_id: $_id) {
+      _id
+      postCount
+      commentCount
+      recentPosts {
+        _id
+        title
+        voteCount
+        commentCount
+        createdAt
+      }
+      recentComments {
+        _id
+        body
+        post {
+          _id
+        }
+        voteCount
+        createdAt
+        updatedAt
+      }
+      user {
+        _id
+        bio
+        username
+        createdAt
+      }
+    }
+  }
+`);
+
 export const GET_POSTS = gql(/* GraphQL */`
   query posts {
     posts {
@@ -21,6 +54,7 @@ export const GET_POSTS = gql(/* GraphQL */`
         username
       }
       voteCount
+      commentCount
       createdAt
       updatedAt
     }

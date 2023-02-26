@@ -7,6 +7,16 @@ const typeDefs = gql`
         _id: ID
         username: String
         bio: String
+        createdAt: DateTime
+    }
+
+    type Profile {
+        _id: ID
+        user: User
+        postCount: Int
+        commentCount: Int
+        recentPosts: [Post]
+        recentComments: [Comment]
     }
 
     type Post {
@@ -15,6 +25,7 @@ const typeDefs = gql`
         body: String
         author: User
         voteCount: Int
+        commentCount: Int
         createdAt: DateTime
         updatedAt: DateTime
     }
@@ -22,6 +33,7 @@ const typeDefs = gql`
     type Comment {
         _id: ID
         body: String
+        post: Post
         author: User
         voteCount: Int
         createdAt: DateTime
@@ -34,6 +46,7 @@ const typeDefs = gql`
 
     type Query {
         account: User
+        profile(_id: String!): Profile
         posts: [Post!]
         post(_id: String!): Post
         comments(post: String!): [Comment!]

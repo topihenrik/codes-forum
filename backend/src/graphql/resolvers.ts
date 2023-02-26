@@ -11,14 +11,23 @@ import { IToken } from '../types';
 
 const resolvers: Resolvers = {
   DateTime: DateTimeResolver,
+  Profile: {
+    user: async (root) => User.findById(root._id),
+    postCount: async (root) => Post.find({ author: root._id }).count(),
+    commentCount: async (root) => Comment.find({ author: root._id }).count(),
+    recentPosts: async (root) => Post.find({ author: root._id }).sort('-createdAt').limit(3).lean(),
+    recentComments: async (root) => Comment.find({ author: root._id }).sort('-createdAt').limit(3).lean(),
+  },
   Post: {
     author: async (root) => User.findById(root.author),
+    commentCount: async (root) => Comment.find({ post: root._id }).count(),
   },
   Comment: {
     author: async (root) => User.findById(root.author),
   },
   Query: {
     account: async (root, args, context) => context.currentUser,
+    profile: async (root, args) => ({ _id: args._id }),
     posts: async () => Post.find({}),
     post: async (root, args) => Post.findById(args._id),
     comments: async (root, args) => Comment.find({ post: args.post }),

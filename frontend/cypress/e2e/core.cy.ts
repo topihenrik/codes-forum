@@ -99,5 +99,15 @@ describe('app core functionality', () => {
       cy.contains('Answered');
       cy.contains('Modified');
     });
+  });
+  it('users profile page can be viewed', () => {
+    cy.visit("http://localhost:4173/");
+    cy.contains("Just DebugIt!");
+    cy.contains("@pertsa82").click();
+    cy.contains("Profile");
+    cy.contains("@pertsa82");
+    cy.contains("Posts: 1");
+    cy.contains("Comments: 1");
+    cy.contains("Account Age: 0 days");
   })
 });

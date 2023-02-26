@@ -1,19 +1,149 @@
+import { useEffect } from 'react';
 import {
-  Container, Box, Typography, Table, Paper, TableHead, TableRow, TableCell, TableBody, Avatar,
+  Container, Box, Typography, Table, Paper, TableHead, TableRow, TableCell, TableBody, Avatar, Link,
 } from '@mui/material';
+import ContentLoader from 'react-content-loader';
+import { Link as RouterLink, useParams, useNavigate } from 'react-router-dom';
+import { DateTime } from 'luxon';
+import { convertFromRaw } from 'draft-js';
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
+import { useQuery } from '@apollo/client';
+import { GET_PROFILE } from '../graphql/queries';
+import { type Post, type Comment } from '../__generated__/graphql';
+import { errorVar } from '../cache';
 
-// Profile information section has fake data -> Implement backend fetching functionality.
-// Component's table has fake data -> Implement backend fetching functionality.
+interface IPostRowProps {
+  post: Post
+}
+
+function PostRow({ post }: IPostRowProps) {
+  return (
+    <TableRow>
+      <TableCell>
+        <Link
+          sx={{ color: 'inherit' }}
+          component={RouterLink}
+          to={`/post/${post._id}`}
+        >
+          {post.title}
+        </Link>
+      </TableCell>
+      <TableCell>
+        {DateTime.fromJSDate(new Date(post.createdAt)).toLocaleString(DateTime.DATE_SHORT)}
+      </TableCell>
+      <TableCell>
+        {post.commentCount}
+      </TableCell>
+      <TableCell>
+        {post.voteCount}
+      </TableCell>
+    </TableRow>
+  );
+}
+
+interface ICommentRowProps {
+  comment: Comment
+}
+
+function CommentRow({ comment }: ICommentRowProps) {
+  const plainTextBody = convertFromRaw(JSON.parse(comment.body || '')).getPlainText();
+  return (
+    <TableRow>
+      <TableCell>
+        <Link
+          sx={{ color: 'inherit' }}
+          component={RouterLink}
+          to={`/post/${comment.post?._id}`}
+        >
+          {plainTextBody}
+        </Link>
+      </TableCell>
+      <TableCell>
+        {DateTime.fromJSDate(new Date(comment.createdAt)).toLocaleString(DateTime.DATE_SHORT)}
+      </TableCell>
+      <TableCell>
+        {comment.voteCount}
+      </TableCell>
+    </TableRow>
+  );
+}
+
 function ProfilePage() {
+  const navigate = useNavigate();
+  const userid = useParams().id || '';
+  const result = useQuery(GET_PROFILE, {
+    variables: {
+      _id: userid,
+    },
+  });
+
+  useEffect(() => {
+    if (!result.loading) {
+      // Loading is complete
+      if (!(result?.data?.profile?.user)) {
+        // User was not found -> Post 404
+        errorVar('User not found');
+        navigate('/error', { replace: true });
+        // return;
+      }
+    }
+  }, [result, navigate]);
+
+  if (result.loading) {
+    return (
+      <Container sx={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 0',
+      }}
+      >
+        <Box sx={{
+          display: 'flex', flexDirection: 'column', gap: '16px', margin: { xs: '0 8px', sm: '0' }, width: 'clamp(300px, 70%, 576px)',
+        }}
+        >
+          <ContentLoader
+            viewBox='0 0 576 1072'
+            backgroundColor='#262626'
+            foregroundColor='#2a2a2a'
+          >
+            <rect
+              x='0'
+              y='0'
+              rx='5'
+              ry='5'
+              width='576'
+              height='310'
+            />
+            <rect
+              x='0'
+              y='326'
+              rx='5'
+              ry='5'
+              width='576'
+              height='365'
+            />
+            <rect
+              x='0'
+              y='707'
+              rx='5'
+              ry='5'
+              width='576'
+              height='365'
+            />
+          </ContentLoader>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (!(result.data?.profile)) return null;
+
   return (
     <Container sx={{
       display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 0',
     }}
     >
       <Box sx={{
-        display: 'flex', flexDirection: 'column', gap: '16px', margin: { xs: '0 8px', sm: '0' }, width: { xs: 'auto', sm: 'clamp(320px, 55%, 576px)' },
+        display: 'flex', flexDirection: 'column', gap: '16px', margin: { xs: '0 8px', sm: '0' }, width: 'clamp(300px, 70%, 576px)',
       }}
       >
         <Paper>
@@ -39,25 +169,41 @@ function ProfilePage() {
                   alt='avatar'
                   src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
                 />
-                <Typography>@jartsa82</Typography>
+                <Typography>
+                  @
+                  {result.data.profile.user?.username}
+                </Typography>
               </Box>
               <Typography>
-                Bio: Hello I am a typical User!
+                Bio:
+                {' '}
+                { ((!result.data.profile.user?.bio) || result.data.profile.user?.bio === '') ? (
+                  'Add a bio in the account page ✍️'
+                ) : (
+                  result.data.profile.user?.bio
+                )}
               </Typography>
             </Box>
           </Box>
           <Paper sx={{
-            display: 'flex', justifyContent: 'space-between', backgroundColor: 'grey.900', borderTopLeftRadius: '0', borderTopRightRadius: '0', padding: '8px',
+            display: 'flex', justifyContent: 'space-between', backgroundColor: 'grey.900', borderTopLeftRadius: '0', borderTopRightRadius: '0', padding: '8px 16px',
           }}
           >
             <Typography>
-              Posts: 13
+              Posts:
+              {' '}
+              {result.data.profile.postCount}
             </Typography>
             <Typography>
-              Comments: 27
+              Comments:
+              {' '}
+              {result.data.profile.commentCount}
             </Typography>
             <Typography>
-              Account Age: 1337 days
+              Account Age:
+              {' '}
+              {Math.floor(-1 * DateTime.fromJSDate(new Date(result.data.profile.user?.createdAt)).diffNow('days').days)}
+              {' days'}
             </Typography>
           </Paper>
         </Paper>
@@ -71,68 +217,43 @@ function ProfilePage() {
             </Typography>
           </Paper>
           <Box sx={{ padding: '16px' }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>
-                    Title
-                  </TableCell>
-                  <TableCell>
-                    Date
-                  </TableCell>
-                  <TableCell>
-                    <ForumOutlinedIcon />
-                  </TableCell>
-                  <TableCell>
-                    <ThumbUpOutlinedIcon />
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell>
-                    TEST: Hello Kitty
-                  </TableCell>
-                  <TableCell>
-                    19.02.2023
-                  </TableCell>
-                  <TableCell>
-                    4
-                  </TableCell>
-                  <TableCell>
-                    13
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    TEST: Hello World
-                  </TableCell>
-                  <TableCell>
-                    16.01.2023
-                  </TableCell>
-                  <TableCell>
-                    2
-                  </TableCell>
-                  <TableCell>
-                    25
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    TEST: Hello Wow
-                  </TableCell>
-                  <TableCell>
-                    05.01.2023
-                  </TableCell>
-                  <TableCell>
-                    14
-                  </TableCell>
-                  <TableCell>
-                    103
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+            {result.data.profile.recentPosts?.length !== 0
+              ? (
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>
+                        Title
+                      </TableCell>
+                      <TableCell>
+                        Date
+                      </TableCell>
+                      <TableCell>
+                        <ForumOutlinedIcon />
+                      </TableCell>
+                      <TableCell>
+                        <ThumbUpOutlinedIcon />
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {result.data.profile.recentPosts?.map(
+                      (post) => (
+                        <PostRow
+                          key={post?._id}
+                          post={post as Post}
+                        />
+                      ),
+                    )}
+                  </TableBody>
+                </Table>
+              ) : (
+                <Typography
+                  sx={{ textAlign: 'center' }}
+                >
+                  ❓ No questions asked yet.
+                </Typography>
+              )}
           </Box>
         </Paper>
         <Paper>
@@ -145,56 +266,40 @@ function ProfilePage() {
             </Typography>
           </Paper>
           <Box sx={{ padding: '16px' }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>
-                    Comment
-                  </TableCell>
-                  <TableCell>
-                    Date
-                  </TableCell>
-                  <TableCell>
-                    <ThumbUpOutlinedIcon />
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell>
-                    Are you sure?
-                  </TableCell>
-                  <TableCell>
-                    19.02.2023
-                  </TableCell>
-                  <TableCell>
-                    2
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    Amazing post!
-                  </TableCell>
-                  <TableCell>
-                    05.02.2023
-                  </TableCell>
-                  <TableCell>
-                    3
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    Why did you do it?
-                  </TableCell>
-                  <TableCell>
-                    08.01.2023
-                  </TableCell>
-                  <TableCell>
-                    1
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+            {result.data.profile.recentPosts?.length !== 0
+              ? (
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>
+                        Comment
+                      </TableCell>
+                      <TableCell>
+                        Date
+                      </TableCell>
+                      <TableCell>
+                        <ThumbUpOutlinedIcon />
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {result.data.profile.recentComments?.map(
+                      (comment) => (
+                        <CommentRow
+                          key={comment?._id}
+                          comment={comment as Comment}
+                        />
+                      ),
+                    )}
+                  </TableBody>
+                </Table>
+              ) : (
+                <Typography
+                  sx={{ textAlign: 'center' }}
+                >
+                  ❗ No answers given yet.
+                </Typography>
+              )}
           </Box>
         </Paper>
       </Box>

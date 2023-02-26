@@ -53,11 +53,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
           />
           <Route
             path='/profile/:id'
-            element={(
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            )}
+            element={<ProfilePage />}
           />
           <Route
             path='/post/create'
