@@ -2,7 +2,7 @@ import jwt_decode from 'jwt-decode';
 
 export interface IDecodedToken {
   iat: number,
-  id: string,
+  _id: string,
   username: string
 }
 

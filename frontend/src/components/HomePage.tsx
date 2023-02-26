@@ -33,7 +33,7 @@ function PostCard({ post }: PostCardProps) {
           </Box>
           <Box sx={{ display: 'flex', gap: '4px' }}>
             <Typography>
-              0
+              {post.commentCount}
             </Typography>
             <QuestionAnswerOutlinedIcon />
           </Box>
@@ -49,10 +49,16 @@ function PostCard({ post }: PostCardProps) {
                 alt='avatar'
                 src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
               />
-              <Typography>
-                @
-                {post.author?.username}
-              </Typography>
+              <Link
+                sx={{ color: 'inherit' }}
+                component={RouterLink}
+                to={`/profile/${post.author?._id}`}
+              >
+                <Typography>
+                  @
+                  {post.author?.username}
+                </Typography>
+              </Link>
             </Box>
             <Typography>
               {DateTime.fromJSDate(new Date(post.createdAt)).toLocaleString(DateTime.DATE_MED)}
@@ -78,13 +84,6 @@ function PostCard({ post }: PostCardProps) {
 
 function PostsList() {
   const result = useQuery(GET_POSTS);
-  /* const result = {
-    data: {
-      posts: false,
-    },
-    error: false,
-    loading: true,
-  }; */
 
   if (result.error) {
     return (
@@ -196,7 +195,7 @@ function HomePage() {
             variant='h3'
             sx={{ color: 'black', fontWeight: '700', fontFamily: 'Roboto Condensed' }}
           >
-            Just DebugIt!
+            Just DebugIt! 🐜
           </Typography>
         </Box>
         <Link

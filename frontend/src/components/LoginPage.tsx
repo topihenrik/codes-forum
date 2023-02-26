@@ -5,8 +5,9 @@ import { useMutation } from '@apollo/client';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LOGIN_USER } from '../graphql/mutations';
-import { tokenVar } from '../cache';
+import { decodedTokenVar } from '../cache';
 import Notification from './Notification';
+import { decodeToken } from '../utils';
 
 function LoginPage() {
   const [login, result] = useMutation(LOGIN_USER);
@@ -24,18 +25,11 @@ function LoginPage() {
     }
   };
 
-  /* if (result?.data?.login) {
-    const token = result.data.login.value;
-    localStorage.setItem('auth_token', token);
-    tokenVar(token);
-    navigate('/');
-  } */
-
   useEffect(() => {
     if (result?.data?.login) {
       const token = result.data.login.value;
       localStorage.setItem('auth_token', token);
-      tokenVar(token);
+      decodedTokenVar(decodeToken(token));
       navigate('/');
     }
   }, [result.data, navigate]);
@@ -69,7 +63,12 @@ function LoginPage() {
             value={password}
             onChange={(event) => { setPassword(event.target.value); }}
           />
-          {result.error && <Notification message={result.error.message} />}
+          {result.error && (
+            <Notification
+              message={result.error.message}
+              type='error'
+            />
+          )}
           <Button
             id='btn-login'
             variant='contained'

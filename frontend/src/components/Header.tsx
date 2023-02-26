@@ -10,15 +10,15 @@ import LoginIcon from '@mui/icons-material/Login';
 import InputIcon from '@mui/icons-material/Input';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useApolloClient, useReactiveVar } from '@apollo/client';
-import { tokenVar } from '../cache';
+import { decodedTokenVar } from '../cache';
 
 function Header() {
   const [drawer, setDrawer] = useState(false);
-  const token = useReactiveVar(tokenVar);
+  const decodedToken = useReactiveVar(decodedTokenVar);
   const client = useApolloClient();
 
   const handleLogout = () => {
-    tokenVar(null);
+    decodedTokenVar(null);
     localStorage.clear();
     client.clearStore();
   };
@@ -42,14 +42,14 @@ function Header() {
           <Typography variant='h4'>DebugIt()</Typography>
         </Link>
         <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: '16px', alignItems: 'center' }}>
-          {token
+          {decodedToken
             ? (
               <>
                 <Link
                   id='link-profile-desktop'
                   sx={{ color: 'inherit', textDecoration: 'none' }}
                   component={RouterLink}
-                  to='/profile/test'
+                  to={`/profile/${decodedToken._id}`}
                 >
                   <Button>
                     <Typography variant='button'>Profile</Typography>
@@ -112,13 +112,13 @@ function Header() {
           open={drawer}
           onClose={() => { setDrawer(false); }}
         >
-          {token
+          {decodedToken
             ? (
               <List>
                 <Link
                   sx={{ color: 'inherit', textDecoration: 'none' }}
                   component={RouterLink}
-                  to='/profile'
+                  to={`/profile/${decodedToken._id}`}
                 >
                   <ListItem>
                     <ListItemButton onClick={() => { setDrawer(false); }}>

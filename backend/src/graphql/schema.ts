@@ -7,6 +7,16 @@ const typeDefs = gql`
         _id: ID
         username: String
         bio: String
+        createdAt: DateTime
+    }
+
+    type Profile {
+        id: ID
+        user: User
+        postCount: Int
+        commentCount: Int
+        recentPosts: [Post]
+        recentComments: [Comment]
     }
 
     type Post {
@@ -15,6 +25,7 @@ const typeDefs = gql`
         body: String
         author: User
         voteCount: Int
+        commentCount: Int
         createdAt: DateTime
         updatedAt: DateTime
     }
@@ -22,6 +33,7 @@ const typeDefs = gql`
     type Comment {
         _id: ID
         body: String
+        post: Post
         author: User
         voteCount: Int
         createdAt: DateTime
@@ -34,9 +46,11 @@ const typeDefs = gql`
 
     type Query {
         account: User
+        profile(_id: String!): Profile
         posts: [Post!]
         post(_id: String!): Post
         comments(post: String!): [Comment!]
+        comment(_id: String!): Comment
     }
 
     type Mutation {
@@ -44,6 +58,17 @@ const typeDefs = gql`
             username: String! @constraint(minLength: 3, maxLength: 255)
             password: String! @constraint(minLength: 3, maxLength: 255)
             password_confirm: String! @constraint(minLength: 3, maxLength: 255)
+        ): User
+        editBasicUser(
+            _id: String!
+            username: String!
+            bio: String!
+        ): User
+        editPasswordUser(
+            _id: String!
+            old_password: String!
+            password: String!
+            password_confirm: String!
         ): User
         login(
             username: String!
@@ -53,9 +78,18 @@ const typeDefs = gql`
             title: String!
             body: String!
         ): Post
+        editPost(
+            _id: String!
+            title: String!
+            body: String!
+        ): Post
         createComment(
             body: String!
             post: String!
+        ): Comment
+        editComment(
+            _id: String!
+            body: String!
         ): Comment
     }
 `;

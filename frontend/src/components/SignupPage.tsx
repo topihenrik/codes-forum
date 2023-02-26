@@ -106,7 +106,12 @@ function SignupPage() {
               onChange={handleFileChange}
             />
           </Button>
-          {error && <Notification message={error.message} />}
+          {error && (
+            <Notification
+              message={error.message}
+              type='error'
+            />
+          )}
           <Button
             id='btn-signup'
             variant='contained'

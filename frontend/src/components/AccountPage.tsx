@@ -1,20 +1,61 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ContentLoader from 'react-content-loader';
 import {
-  Box, Button, Container, Typography, Paper, TextField, Avatar,
+  Box, Button, Container, Typography, Paper, TextField, Avatar, Link,
 } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
-import { useQuery } from '@apollo/client';
+import {
+  ServerError, useMutation, useQuery, useReactiveVar,
+} from '@apollo/client';
+import { decodedTokenVar } from '../cache';
 import { GET_ACCOUNT } from '../graphql/queries';
 import { AccountQuery } from '../__generated__/graphql';
+import { EDIT_BASIC_USER, EDIT_PASSWORD_USER } from '../graphql/mutations';
+import Notification from './Notification';
 
 interface BasicInfoFormProps {
   data: AccountQuery | undefined,
   loading: boolean
 }
 
+interface INotification {
+  message: string,
+  type: 'success' | 'error'
+}
+
 function BasicInfoForm({ data, loading }: BasicInfoFormProps) {
+  const decodedToken = useReactiveVar(decodedTokenVar);
+  const [editBasic, result] = useMutation(EDIT_BASIC_USER);
   const [file, setFile] = useState<File | null>(null);
+  const [username, setUsername] = useState('');
+  const [bio, setBio] = useState('');
+  const [notification, setNotification] = useState<INotification | null>(null);
+
+  // Set old datas to text fields
+  useEffect(() => {
+    setUsername(data?.account?.username || '');
+    setBio(data?.account?.bio || '');
+  }, [data?.account]);
+
+  // Succesful information update -> Inform user
+  useEffect(() => {
+    if (result.data?.editBasicUser) {
+      setNotification({ message: 'Information updated', type: 'success' });
+    }
+  }, [result.data?.editBasicUser]);
+
+  // Failed information update -> Inform user about issues
+  useEffect(() => {
+    if (result.error) {
+      if (result.error.networkError) { // parse network error message
+        const netError = result.error.networkError as ServerError;
+        setNotification({ message: netError.result.errors[0].message, type: 'error' });
+      } else { // parse graphql error message
+        setNotification({ message: result.error.message, type: 'error' });
+      }
+    }
+  }, [result.error]);
 
   const handleFileChange = (event: React.ChangeEvent) => {
     const inputFileElement = event.target as HTMLInputElement;
@@ -23,6 +64,16 @@ function BasicInfoForm({ data, loading }: BasicInfoFormProps) {
       return;
     }
     setFile(inputFileElement.files[0]);
+  };
+
+  const handleEditBasicSubmit = async (event: React.FormEvent) => {
+    try {
+      event.preventDefault();
+      await editBasic({ variables: { _id: decodedToken?._id || '', username, bio } });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
   };
 
   return (
@@ -39,7 +90,7 @@ function BasicInfoForm({ data, loading }: BasicInfoFormProps) {
           display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', padding: { xs: '16px', sm: '32px' }, boxSizing: 'border-box',
         }}
       >
-        { (loading && !data) ? (
+        { (loading) ? (
           <ContentLoader
             viewBox='0 0 340 258'
             backgroundColor='#262626'
@@ -81,13 +132,19 @@ function BasicInfoForm({ data, loading }: BasicInfoFormProps) {
         ) : (
           <>
             <TextField
+              id='input-username'
               label='Username'
-              defaultValue={data?.account?.username}
+              // defaultValue={data?.account?.username}
+              value={username}
+              onChange={(event) => { setUsername(event.target.value); }}
             />
             <TextField
+              id='input-bio'
               label='Bio'
               multiline
-              defaultValue={data?.account?.bio}
+              // defaultValue={data?.account?.bio}
+              value={bio}
+              onChange={(event) => { setBio(event.target.value); }}
             />
             <Button
               variant='outlined'
@@ -102,7 +159,17 @@ function BasicInfoForm({ data, loading }: BasicInfoFormProps) {
                 onChange={handleFileChange}
               />
             </Button>
-            <Button variant='contained'>
+            {notification && (
+              <Notification
+                message={notification.message}
+                type={notification.type}
+              />
+            )}
+            <Button
+              id='btn-update-basic'
+              variant='contained'
+              onClick={handleEditBasicSubmit}
+            >
               Update Information
             </Button>
           </>
@@ -112,7 +179,51 @@ function BasicInfoForm({ data, loading }: BasicInfoFormProps) {
   );
 }
 
-function PasswordInfoForm() {
+interface PasswordInfoFormProps {
+  loading: boolean
+}
+
+function PasswordInfoForm({ loading }: PasswordInfoFormProps) {
+  const decodedToken = useReactiveVar(decodedTokenVar);
+  const [editPassword, result] = useMutation(EDIT_PASSWORD_USER);
+  const [oldPassword, setOldPassword] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [notification, setNotification] = useState<INotification | null>(null);
+
+  // Succesful password update -> Inform user
+  useEffect(() => {
+    if (result.data?.editPasswordUser) {
+      setNotification({ message: 'Password updated', type: 'success' });
+    }
+  }, [result.data?.editPasswordUser]);
+
+  // Failed password update -> Inform user about issues
+  useEffect(() => {
+    if (result.error) {
+      if (result.error.networkError) { // parse network error message
+        const netError = result.error.networkError as ServerError;
+        setNotification({ message: netError.result.errors[0].message, type: 'error' });
+      } else { // parse graphql error message
+        setNotification({ message: result.error.message, type: 'error' });
+      }
+    }
+  }, [result.error]);
+
+  const handleEditPasswordSubmit = async (event: React.FormEvent) => {
+    try {
+      event.preventDefault();
+      await editPassword({
+        variables: {
+          _id: decodedToken?._id || '', old_password: oldPassword, password, password_confirm: passwordConfirm,
+        },
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  };
+
   return (
     <Paper>
       <Paper sx={{
@@ -127,19 +238,83 @@ function PasswordInfoForm() {
           display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', padding: { xs: '16px', sm: '32px' }, boxSizing: 'border-box',
         }}
       >
-        <TextField
-          sx={{ width: '100%' }}
-          label='Old Password'
-        />
-        <TextField
-          label='New Password'
-        />
-        <TextField
-          label='Confirm New Password'
-        />
-        <Button variant='contained'>
-          Update Password
-        </Button>
+        {loading ? (
+          <ContentLoader
+            viewBox='0 0 340 258'
+            backgroundColor='#262626'
+            foregroundColor='#2a2a2a'
+          >
+            <rect
+              x='0'
+              y='0'
+              rx='5'
+              ry='5'
+              width='340'
+              height='60'
+            />
+            <rect
+              x='0'
+              y='76'
+              rx='5'
+              ry='5'
+              width='340'
+              height='60'
+            />
+            <rect
+              x='0'
+              y='152'
+              rx='5'
+              ry='5'
+              width='340'
+              height='45'
+            />
+            <rect
+              x='0'
+              y='213'
+              rx='5'
+              ry='5'
+              width='340'
+              height='45'
+            />
+          </ContentLoader>
+        ) : (
+          <>
+            <TextField
+              id='input-old-password'
+              label='Old Password'
+              type='password'
+              value={oldPassword}
+              onChange={(event) => { setOldPassword(event.target.value); }}
+            />
+            <TextField
+              id='input-new-password'
+              label='New Password'
+              type='password'
+              value={password}
+              onChange={(event) => { setPassword(event.target.value); }}
+            />
+            <TextField
+              id='input-confirm-password'
+              label='Confirm New Password'
+              type='password'
+              value={passwordConfirm}
+              onChange={(event) => { setPasswordConfirm(event.target.value); }}
+            />
+            {notification && (
+              <Notification
+                message={notification.message}
+                type={notification.type}
+              />
+            )}
+            <Button
+              id='btn-update-password'
+              variant='contained'
+              onClick={handleEditPasswordSubmit}
+            >
+              Update Password
+            </Button>
+          </>
+        )}
       </Box>
     </Paper>
   );
@@ -205,12 +380,18 @@ function AccountPage() {
                     alt='avatar'
                     src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
                   />
-                  <Typography>
-                    @
-                    {result.data?.account?.username}
-                    {' '}
-                    - Your Profile
-                  </Typography>
+                  <Link
+                    sx={{ color: 'inherit' }}
+                    component={RouterLink}
+                    to={`/profile/${result.data?.account?._id}`}
+                  >
+                    <Typography>
+                      @
+                      {result.data?.account?.username}
+                      {' '}
+                      - Your Profile
+                    </Typography>
+                  </Link>
                 </>
               )}
             </Box>
@@ -220,7 +401,9 @@ function AccountPage() {
           data={result.data}
           loading={result.loading}
         />
-        <PasswordInfoForm />
+        <PasswordInfoForm
+          loading={result.loading}
+        />
       </Box>
     </Container>
   );

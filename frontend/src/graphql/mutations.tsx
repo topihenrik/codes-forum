@@ -12,6 +12,33 @@ export const CREATE_USER = gql(/* GraphQL */`
   }
 `);
 
+export const EDIT_BASIC_USER = gql(/* GraphQL */`
+  mutation editBasicUser($_id: String!, $username: String!, $bio: String!) {
+    editBasicUser(
+      _id: $_id
+      username: $username
+      bio: $bio
+    ) {
+      _id
+      username
+      bio
+    }
+  }
+`);
+
+export const EDIT_PASSWORD_USER = gql(/* GraphQL */`
+  mutation EditPasswordUser($_id: String!, $old_password: String!, $password: String!, $password_confirm: String!) {
+    editPasswordUser(
+      _id: $_id
+      old_password: $old_password
+      password: $password
+      password_confirm: $password_confirm
+    ) {
+      _id
+    }
+  }
+`);
+
 export const LOGIN_USER = gql(/* GraphQL */`
   mutation login($username: String!, $password: String!) {
     login(
@@ -34,11 +61,34 @@ export const CREATE_POST = gql(/* GraphQL */`
   }
 `);
 
+export const EDIT_POST = gql(/* GraphQL */`
+  mutation editPost($_id: String!, $title: String!, $body: String!) {
+    editPost(
+      _id: $_id
+      title: $title
+      body: $body
+    ) {
+      _id
+    }
+  }
+`);
+
 export const CREATE_COMMENT = gql(/* GraphQL */`
   mutation createComment($body: String!, $post: String!) {
     createComment(
       body: $body
       post: $post
+    ) {
+      _id
+    }
+  }
+`);
+
+export const EDIT_COMMENT = gql(/* GraphQL */`
+  mutation editComment($_id: String!, $body: String!) {
+    editComment(
+      _id: $_id
+      body: $body
     ) {
       _id
     }
