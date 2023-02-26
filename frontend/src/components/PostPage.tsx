@@ -267,7 +267,12 @@ function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
         editorState={editorState}
         onEditorStateChange={handleEditorChange}
       />
-      {error && <Notification message={error.message} />}
+      {error && (
+      <Notification
+        message={error.message}
+        type='error'
+      />
+      )}
       <Box sx={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '8px',
       }}
@@ -581,7 +586,12 @@ function CommentCreate() {
         editorState={editorState}
         onEditorStateChange={handleEditorChange}
       />
-      {error && <Notification message={error.message} />}
+      {error && (
+      <Notification
+        message={error.message}
+        type='error'
+      />
+      )}
       <Box sx={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '8px',
       }}

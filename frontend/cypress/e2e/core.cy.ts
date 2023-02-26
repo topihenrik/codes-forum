@@ -109,5 +109,18 @@ describe('app core functionality', () => {
     cy.contains("Posts: 1");
     cy.contains("Comments: 1");
     cy.contains("Account Age: 0 days");
-  })
+  });
+  it("user can change their information", () => {
+    cy.visit("http://localhost:4173/");
+    cy.get("#link-login-desktop").click();
+    cy.get('#input-username').type('pertsa82');
+    cy.get('#input-password').type('jes123');
+    cy.get('#btn-login').click();
+    cy.contains("Just DebugIt!");
+    cy.get("#link-account-desktop").click();
+    cy.get('#input-bio').type('I\'m here to learn new things!');
+    cy.get('#btn-update-basic').click();
+    cy.contains("@pertsa82").click();
+    cy.contains("Bio: I\'m here to learn new things!");
+  });
 });

@@ -12,11 +12,11 @@ import { IToken } from '../types';
 const resolvers: Resolvers = {
   DateTime: DateTimeResolver,
   Profile: {
-    user: async (root) => User.findById(root._id),
-    postCount: async (root) => Post.find({ author: root._id }).count(),
-    commentCount: async (root) => Comment.find({ author: root._id }).count(),
-    recentPosts: async (root) => Post.find({ author: root._id }).sort('-createdAt').limit(3).lean(),
-    recentComments: async (root) => Comment.find({ author: root._id }).sort('-createdAt').limit(3).lean(),
+    user: async (root) => User.findById(root.id),
+    postCount: async (root) => Post.find({ author: root.id }).count(),
+    commentCount: async (root) => Comment.find({ author: root.id }).count(),
+    recentPosts: async (root) => Post.find({ author: root.id }).sort('-createdAt').limit(3).lean(),
+    recentComments: async (root) => Comment.find({ author: root.id }).sort('-createdAt').limit(3).lean(),
   },
   Post: {
     author: async (root) => User.findById(root.author),
@@ -27,7 +27,7 @@ const resolvers: Resolvers = {
   },
   Query: {
     account: async (root, args, context) => context.currentUser,
-    profile: async (root, args) => ({ _id: args._id }),
+    profile: async (root, args) => ({ id: args._id }),
     posts: async () => Post.find({}),
     post: async (root, args) => Post.findById(args._id),
     comments: async (root, args) => Comment.find({ post: args.post }),
@@ -52,6 +52,63 @@ const resolvers: Resolvers = {
       } catch (error) {
         throw new GraphQLError(error.message, { extensions: { code: 'BAD_USER_INPUT' } });
       }
+    },
+    editBasicUser: async (root, args, context) => {
+      if (!context.currentUser) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const oldUser = await User.findById(args._id);
+
+      if (!oldUser) {
+        throw new GraphQLError('user doesn\'t exist', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      if (oldUser._id.toString() !== context.currentUser._id.toString()) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      // User wants to change username
+      if (oldUser.username !== args.username) {
+        const existingUsername = await User.findOne({ username: args.username });
+        if (existingUsername) {
+          throw new GraphQLError('username already exists', { extensions: { code: 'BAD_USER_INPUT' } });
+        }
+        oldUser.username = args.username;
+      }
+
+      oldUser.bio = args.bio;
+
+      return oldUser.save();
+    },
+    editPasswordUser: async (root, args, context) => {
+      if (!context.currentUser) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const oldUser = await User.findById(args._id);
+
+      if (!oldUser) {
+        throw new GraphQLError('user doesn\'t exist', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      if (oldUser._id.toString() !== context.currentUser._id.toString()) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      if (!(await bcrypt.compare(args.old_password, oldUser.password))) {
+        throw new GraphQLError('incorrect credentials', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      if (args.password !== args.password_confirm) {
+        throw new GraphQLError("passwords don't match", { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const hashedPassword = await bcrypt.hash(args.password, 10);
+
+      oldUser.password = hashedPassword;
+
+      return oldUser.save();
     },
     login: async (root, args) => {
       const user = await User.findOne({ username: args.username });

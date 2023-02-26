@@ -11,7 +11,7 @@ const typeDefs = gql`
     }
 
     type Profile {
-        _id: ID
+        id: ID
         user: User
         postCount: Int
         commentCount: Int
@@ -58,6 +58,17 @@ const typeDefs = gql`
             username: String! @constraint(minLength: 3, maxLength: 255)
             password: String! @constraint(minLength: 3, maxLength: 255)
             password_confirm: String! @constraint(minLength: 3, maxLength: 255)
+        ): User
+        editBasicUser(
+            _id: String!
+            username: String!
+            bio: String!
+        ): User
+        editPasswordUser(
+            _id: String!
+            old_password: String!
+            password: String!
+            password_confirm: String!
         ): User
         login(
             username: String!

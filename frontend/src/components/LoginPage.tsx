@@ -63,7 +63,12 @@ function LoginPage() {
             value={password}
             onChange={(event) => { setPassword(event.target.value); }}
           />
-          {result.error && <Notification message={result.error.message} />}
+          {result.error && (
+            <Notification
+              message={result.error.message}
+              type='error'
+            />
+          )}
           <Button
             id='btn-login'
             variant='contained'

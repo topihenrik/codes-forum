@@ -195,7 +195,7 @@ function HomePage() {
             variant='h3'
             sx={{ color: 'black', fontWeight: '700', fontFamily: 'Roboto Condensed' }}
           >
-            Just DebugIt!
+            Just DebugIt! 🐜
           </Typography>
         </Box>
         <Link

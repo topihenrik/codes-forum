@@ -13,7 +13,7 @@ export const GET_ACCOUNT = gql(/* GraphQL */`
 export const GET_PROFILE = gql(/* GraphQL */`
   query profile($_id: String!) {
     profile(_id: $_id) {
-      _id
+      id
       postCount
       commentCount
       recentPosts {

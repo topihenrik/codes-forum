@@ -137,7 +137,12 @@ function PostCreatePage() {
               onEditorStateChange={handleEditorChange}
             />
           </Box>
-          {error && <Notification message={error.message} />}
+          {error && (
+            <Notification
+              message={error.message}
+              type='error'
+            />
+          )}
           <Box sx={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '8px',
           }}
