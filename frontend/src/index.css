@@ -19,6 +19,9 @@ pre {
     justify-content: space-between;
     align-items: center;
     background-color: #121212;
+    background-image: url('./assets/black-waves-v5.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 .icon {

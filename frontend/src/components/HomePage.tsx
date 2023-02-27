@@ -11,6 +11,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { GET_POSTS } from '../graphql/queries';
 import { type Post } from '../__generated__/graphql';
 import '@fontsource/roboto-condensed';
+import bgBlurSvg from '../assets/bg-blur-v2.svg';
 
 interface PostCardProps {
   post: Post
@@ -178,24 +179,28 @@ function HomePage() {
   return (
     <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box sx={{
-        display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '16px', width: 'clamp(300px, 70%, 640px)',
+        display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '16px', width: 'clamp(300px, 85%, 640px)',
       }}
       >
         <Box sx={{
-          display: 'flex', flexDirection: 'column', justifyContent: 'center', backgroundImage: 'url(https://res.cloudinary.com/dqcnxy51g/image/upload/v1677187718/codes-forum/static/green-gradient_hr2aht.jpg)', backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '256px', padding: '32px',
+          display: 'flex', flexDirection: 'column', justifyContent: 'center', backgroundImage: `url(${bgBlurSvg})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '256px', padding: '32px',
         }}
         >
           <Typography
             variant='h4'
-            sx={{ color: 'black', fontWeight: '700', fontFamily: 'Roboto Condensed' }}
+            sx={{
+              color: '#059c3f', fontWeight: '700', fontFamily: 'Roboto Condensed', textShadow: '1px 1px 1px black',
+            }}
           >
             Having problems?
           </Typography>
           <Typography
             variant='h3'
-            sx={{ color: 'black', fontWeight: '700', fontFamily: 'Roboto Condensed' }}
+            sx={{
+              color: '#059c3f', fontWeight: '700', fontFamily: 'Roboto Condensed', textShadow: '1px 1px 1px black',
+            }}
           >
-            Just DebugIt! 🐜
+            Just DebugIt!
           </Typography>
         </Box>
         <Link

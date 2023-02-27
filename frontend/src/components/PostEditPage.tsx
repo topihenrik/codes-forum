@@ -143,7 +143,7 @@ function PostEditPage() {
     return (
       <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Box sx={{
-          display: 'flex', flexDirection: 'column', gap: '8px', width: 'clamp(300px, 50%, 768px)',
+          display: 'flex', flexDirection: 'column', gap: '8px', width: 'clamp(300px, 85%, 640px)',
         }}
         >
           <ContentLoader
@@ -176,7 +176,7 @@ function PostEditPage() {
   return (
     <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box sx={{
-        display: 'flex', flexDirection: 'column', gap: '8px', width: 'clamp(300px, 50%, 768px)',
+        display: 'flex', flexDirection: 'column', gap: '8px', width: 'clamp(300px, 85%, 640px)',
       }}
       >
         <Paper sx={{ padding: '8px' }}>

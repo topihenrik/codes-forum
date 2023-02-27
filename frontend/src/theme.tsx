@@ -24,13 +24,18 @@ const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: { // https://m2.material.io/inline-tools/color/ #002D08
-      main: '#186436',
       light: '#4f976d',
+      main: '#186436',
       dark: '#084620',
     },
+    secondary: {
+      light: '#191919',
+      main: '#141414',
+      dark: '#080808',
+    },
     info: {
-      main: '#960050',
       light: '#af2a6c',
+      main: '#960050',
       dark: '#6d0242',
     },
     text: {
