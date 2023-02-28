@@ -90,6 +90,7 @@ export const GET_COMMENTS = gql(/* GraphQL */`
         username
       }
       voteCount
+      voteStatus
       createdAt
       updatedAt
     }

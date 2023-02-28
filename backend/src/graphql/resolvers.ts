@@ -47,8 +47,36 @@ const resolvers: Resolvers = {
       });
       return finalPosts as PostType[];
     },
-    post: async (root, args) => Post.findById(args._id),
-    comments: async (root, args) => Comment.find({ post: args.post }),
+    post: async (root, args, context) => {
+      const thepost = await Post.findById(args._id).lean();
+      if (!context.currentUser) {
+        return thepost as PostType;
+      }
+      const votingResult = thepost.votes.find(
+        (id) => id.toString() === context.currentUser._id.toString(),
+      );
+      if (votingResult) {
+        return { ...thepost, voteStatus: 'UP' } as PostType;
+      }
+      return { ...thepost, voteStatus: 'NONE' } as PostType;
+    },
+    comments: async (root, args, context) => {
+      const comments = await Comment.find({ post: args.post }).lean();
+      if (!context.currentUser) {
+        return comments as CommentType[];
+      }
+
+      const finalComments = comments.map((comment) => {
+        const votingResult = comment.votes.find(
+          (id) => id.toString() === context.currentUser._id.toString(),
+        );
+        if (votingResult) {
+          return { ...comment, voteStatus: 'UP' };
+        }
+        return { ...comment, voteStatus: 'NONE' };
+      });
+      return finalComments as CommentType[];
+    },
     comment: async (root, args) => Comment.findById(args._id),
   },
   Mutation: {
@@ -265,6 +293,62 @@ const resolvers: Resolvers = {
       oldComment.body = args.body;
 
       return oldComment.save() as Promise<CommentType>;
+    },
+    voteComment: async (root, args, context) => {
+      if (!context.currentUser) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const theComment = await Comment.findById(args._id);
+
+      if (!theComment) {
+        throw new GraphQLError('comment doesn\'t exist', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const voteFound = theComment.votes.findIndex(
+        (userId) => userId.toString() === context.currentUser._id.toString(),
+      );
+
+      console.log(args.voteStatus);
+
+      if (args.voteStatus === 'NONE') {
+        // User wants to remove a vote
+        if (voteFound === -1) {
+          // There is no vote to remove
+          return null;
+        }
+        // There is a vote and it will be removed
+        const updatedComment = await Comment.findOneAndUpdate(
+          { _id: args._id },
+          { $pullAll: { votes: [context.currentUser._id] }, $inc: { voteCount: -1 } },
+          { new: true, runValidators: true, context: 'query' },
+        ).lean();
+
+        return {
+          ...updatedComment,
+          voteStatus: 'NONE',
+        } as CommentType;
+      // eslint-disable-next-line no-else-return
+      } else if (args.voteStatus === 'UP') {
+        // User wants to vote
+        if (voteFound === -1) {
+          // There is no vote and a vote will be added
+
+          const updatedComment = await Comment.findOneAndUpdate(
+            { _id: args._id },
+            { $push: { votes: context.currentUser._id }, $inc: { voteCount: 1 } },
+            { new: true, runValidators: true, context: 'query' },
+          ).lean();
+
+          return {
+            ...updatedComment,
+            voteStatus: 'UP',
+          } as CommentType;
+        }
+        // There is already a vote
+        return null;
+      }
+      return null;
     },
   },
 };

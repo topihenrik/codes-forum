@@ -20,8 +20,7 @@ function Header() {
   const handleLogout = () => {
     decodedTokenVar(null);
     localStorage.clear();
-    client.clearStore();
-    window.location.reload();
+    client.resetStore();
   };
 
   return (

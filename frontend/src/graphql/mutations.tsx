@@ -107,3 +107,16 @@ export const EDIT_COMMENT = gql(/* GraphQL */`
     }
   }
 `);
+
+export const VOTE_COMMENT = gql(/* GraphQL */`
+  mutation voteComment($_id: String!, $voteStatus: Vote!) {
+    voteComment(
+      _id: $_id
+      voteStatus: $voteStatus
+    ) {
+      _id
+      voteCount
+      voteStatus
+    }
+  }
+`);

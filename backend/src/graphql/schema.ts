@@ -102,6 +102,10 @@ const typeDefs = gql`
             _id: String!
             body: String!
         ): Comment
+        voteComment(
+            _id: String!
+            voteStatus: Vote!
+        ): Comment
     }
 `;
 

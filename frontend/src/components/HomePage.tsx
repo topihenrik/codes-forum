@@ -20,8 +20,13 @@ interface PostCardProps {
 function PostCard({ post }: PostCardProps) {
   const [votePost] = useMutation(VOTE_POST);
 
-  const handleVoteSubmit = (voteStatus: Vote) => {
-    votePost({ variables: { _id: post._id || '', voteStatus } });
+  const handleVoteSubmit = async (voteStatus: Vote) => {
+    try {
+      await votePost({ variables: { _id: post._id || '', voteStatus } });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
   };
 
   return (

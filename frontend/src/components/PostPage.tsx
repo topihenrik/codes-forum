@@ -6,8 +6,6 @@ import {
   Container, Box, Typography, Paper, Link, Button, Divider, Avatar, ButtonBase,
 } from '@mui/material';
 import DOMPurify from 'dompurify';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { DateTime } from 'luxon';
 import { convertFromRaw, convertToRaw, EditorState } from 'draft-js';
 import ContentLoader from 'react-content-loader';
@@ -19,7 +17,9 @@ import { GET_COMMENT, GET_COMMENTS, GET_POST } from '../graphql/queries';
 import { Vote, type Comment } from '../__generated__/graphql';
 import { errorVar, decodedTokenVar } from '../cache';
 import DraftEditor from './DraftEditor';
-import { CREATE_COMMENT, EDIT_COMMENT, VOTE_POST } from '../graphql/mutations';
+import {
+  CREATE_COMMENT, EDIT_COMMENT, VOTE_COMMENT, VOTE_POST,
+} from '../graphql/mutations';
 import Notification from './Notification';
 import Voting from './Voting';
 
@@ -80,8 +80,13 @@ function FullPost() {
   const { post } = result.data;
   const cleanBody = post.body ? DOMPurify.sanitize(draftToHtml(JSON.parse((post.body)))) : '';
 
-  const handleVoteSubmit = (voteStatus: Vote) => {
-    votePost({ variables: { _id: post._id || '', voteStatus } });
+  const handleVoteSubmit = async (voteStatus: Vote) => {
+    try {
+      await votePost({ variables: { _id: post._id || '', voteStatus } });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
   };
 
   return (
@@ -315,6 +320,17 @@ function FullComment({ comment }: IFullCommentProps) {
   const decodedToken = useReactiveVar(decodedTokenVar);
   const cleanBody = comment.body ? DOMPurify.sanitize(draftToHtml(JSON.parse(comment.body))) : '';
 
+  const [voteComment] = useMutation(VOTE_COMMENT);
+
+  const handleVoteSubmit = async (voteStatus: Vote) => {
+    try {
+      await voteComment({ variables: { _id: comment._id || '', voteStatus } });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  };
+
   if (editing) {
     return (
       <CommentEdit
@@ -337,11 +353,11 @@ function FullComment({ comment }: IFullCommentProps) {
           display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'fit-content',
         }}
         >
-          <ArrowUpwardIcon />
-          <Typography>
-            {comment.voteCount}
-          </Typography>
-          <ArrowDownwardIcon />
+          <Voting
+            voteCount={comment.voteCount || 0}
+            voteStatus={comment.voteStatus || Vote.None}
+            handleVoteSubmit={handleVoteSubmit}
+          />
         </Box>
       </Box>
       <Box sx={{
