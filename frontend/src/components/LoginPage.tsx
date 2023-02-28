@@ -1,7 +1,7 @@
 import {
   Box, Button, Container, TextField, Typography, Paper,
 } from '@mui/material';
-import { useMutation } from '@apollo/client';
+import { useMutation, useApolloClient } from '@apollo/client';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LOGIN_USER } from '../graphql/mutations';
@@ -12,6 +12,7 @@ import { decodeToken } from '../utils';
 function LoginPage() {
   const [login, result] = useMutation(LOGIN_USER);
   const navigate = useNavigate();
+  const client = useApolloClient();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -30,9 +31,10 @@ function LoginPage() {
       const token = result.data.login.value;
       localStorage.setItem('auth_token', token);
       decodedTokenVar(decodeToken(token));
+      client.resetStore();
       navigate('/');
     }
-  }, [result.data, navigate]);
+  }, [result.data, client, navigate]);
 
   return (
     <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

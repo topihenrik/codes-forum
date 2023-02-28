@@ -6,8 +6,6 @@ import {
   Container, Box, Typography, Paper, Link, Button, Divider, Avatar, ButtonBase,
 } from '@mui/material';
 import DOMPurify from 'dompurify';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { DateTime } from 'luxon';
 import { convertFromRaw, convertToRaw, EditorState } from 'draft-js';
 import ContentLoader from 'react-content-loader';
@@ -16,11 +14,14 @@ import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { GET_COMMENT, GET_COMMENTS, GET_POST } from '../graphql/queries';
-import { type Comment } from '../__generated__/graphql';
+import { Vote, type Comment } from '../__generated__/graphql';
 import { errorVar, decodedTokenVar } from '../cache';
 import DraftEditor from './DraftEditor';
-import { CREATE_COMMENT, EDIT_COMMENT } from '../graphql/mutations';
+import {
+  CREATE_COMMENT, EDIT_COMMENT, VOTE_COMMENT, VOTE_POST,
+} from '../graphql/mutations';
 import Notification from './Notification';
+import Voting from './Voting';
 
 function FullPost() {
   const decodedToken = useReactiveVar(decodedTokenVar);
@@ -31,6 +32,7 @@ function FullPost() {
       _id: postId,
     },
   });
+  const [votePost] = useMutation(VOTE_POST);
 
   // Loading is complete and a post was not found -> Post 404
   if (!result.loading && (!(result?.data?.post))) {
@@ -78,9 +80,18 @@ function FullPost() {
   const { post } = result.data;
   const cleanBody = post.body ? DOMPurify.sanitize(draftToHtml(JSON.parse((post.body)))) : '';
 
+  const handleVoteSubmit = async (voteStatus: Vote) => {
+    try {
+      await votePost({ variables: { _id: post._id || '', voteStatus } });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  };
+
   return (
     <Box
-      className='post'
+      className='post-full'
     >
       <Paper sx={{
         backgroundColor: 'primary.dark', borderBottomLeftRadius: '0', borderBottomRightRadius: '0', padding: { xs: '8px', sm: '16px' }, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '8px',
@@ -96,11 +107,11 @@ function FullPost() {
           display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'fit-content',
         }}
         >
-          <ArrowUpwardIcon />
-          <Typography>
-            {post.voteCount}
-          </Typography>
-          <ArrowDownwardIcon />
+          <Voting
+            voteCount={post.voteCount || 0}
+            voteStatus={post.voteStatus || Vote.None}
+            handleVoteSubmit={handleVoteSubmit}
+          />
         </Box>
         <Box sx={{
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%',
@@ -309,6 +320,17 @@ function FullComment({ comment }: IFullCommentProps) {
   const decodedToken = useReactiveVar(decodedTokenVar);
   const cleanBody = comment.body ? DOMPurify.sanitize(draftToHtml(JSON.parse(comment.body))) : '';
 
+  const [voteComment] = useMutation(VOTE_COMMENT);
+
+  const handleVoteSubmit = async (voteStatus: Vote) => {
+    try {
+      await voteComment({ variables: { _id: comment._id || '', voteStatus } });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  };
+
   if (editing) {
     return (
       <CommentEdit
@@ -331,11 +353,11 @@ function FullComment({ comment }: IFullCommentProps) {
           display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'fit-content',
         }}
         >
-          <ArrowUpwardIcon />
-          <Typography>
-            {comment.voteCount}
-          </Typography>
-          <ArrowDownwardIcon />
+          <Voting
+            voteCount={comment.voteCount || 0}
+            voteStatus={comment.voteStatus || Vote.None}
+            handleVoteSubmit={handleVoteSubmit}
+          />
         </Box>
       </Box>
       <Box sx={{
@@ -634,7 +656,7 @@ function PostPage() {
   return (
     <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box sx={{
-        display: 'flex', flexDirection: 'column', gap: '32px', margin: { xs: '0 8px', sm: '0' }, padding: '16px 0', width: 'clamp(300px, 70%, 576px)',
+        display: 'flex', flexDirection: 'column', gap: '32px', margin: { xs: '0 8px', sm: '0' }, padding: '16px 0', width: 'clamp(300px, 85%, 640px)',
       }}
       >
         <Paper>

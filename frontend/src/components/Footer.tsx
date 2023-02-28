@@ -5,7 +5,10 @@ import GitHubIcon from '../assets/github.svg';
 
 function Footer() {
   return (
-    <Paper sx={{ width: '100%', padding: '8px 16px', boxSizing: 'border-box' }}>
+    <Paper sx={{
+      width: '100%', padding: '8px 16px', boxSizing: 'border-box', backgroundColor: 'secondary.dark',
+    }}
+    >
       <Container sx={{ display: 'flex', justifyContent: 'center', boxSizing: 'border-box' }}>
         <Typography sx={{ display: 'flex', alignItems: 'center' }}>
           Developed by

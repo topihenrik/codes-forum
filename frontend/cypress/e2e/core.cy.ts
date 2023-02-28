@@ -1,10 +1,14 @@
+before(() => {
+  cy.task('delete:db');
+});
+
 describe('app core functionality', () => {
   it('visit front page', () => {
-    cy.visit("http://localhost:4173/");
+    cy.visit("/");
     cy.contains("Just DebugIt!")
   });
   it('sign up, login and go to account page', () => {
-    cy.visit("http://localhost:4173/");
+    cy.visit("/");
     cy.get("#link-signup-desktop").click();
     cy.contains('Create account');
     cy.get('#input-username').type("pertsa82");
@@ -25,8 +29,8 @@ describe('app core functionality', () => {
     cy.get('#link-account-desktop').click();
     cy.contains('@pertsa82');
   });
-  it('create a new post and view it', () => {
-    cy.visit("http://localhost:4173/");
+  it('create a new post', () => {
+    cy.visit("/");
     cy.get("#link-login-desktop").click();
     cy.get('#input-username').type('pertsa82');
     cy.get('#input-password').type('jes123');
@@ -42,8 +46,25 @@ describe('app core functionality', () => {
     cy.contains("Asked");
     cy.contains('My test file contains 5 tests. Is that possible to run a specific test rather than all the tests in the file?');
   });
-  it('create a comment to a post and view it', () => {
-    cy.visit("http://localhost:4173/");
+  it('like a post', () => {
+    cy.visit("/");
+    cy.get('.btn-vote').click();
+    cy.get('.text-votes').contains('0');
+    cy.get("#link-login-desktop").click();
+    cy.get('#input-username').type('pertsa82');
+    cy.get('#input-password').type('jes123');
+    cy.get('#btn-login').click();
+    cy.contains("Just DebugIt!");
+    cy.contains('I need help with a problem!').click();
+    cy.get('.post-full').within(() => {
+      cy.get('.btn-vote').click();
+      cy.get('.text-votes').contains('1');
+      cy.get('.btn-vote').click();
+      cy.get('.text-votes').contains('0');
+    });
+  });
+  it('create a comment to a post', () => {
+    cy.visit("/");
     cy.get("#link-login-desktop").click();
     cy.get('#input-username').type('pertsa82');
     cy.get('#input-password').type('jes123');
@@ -57,8 +78,8 @@ describe('app core functionality', () => {
     cy.reload();
     cy.get(".comment").contains("To solve the problem you need to restart the computer.");
   });
-  it('edit a post and view it', () => {
-    cy.visit("http://localhost:4173/");
+  it('edit a post', () => {
+    cy.visit("/");
     cy.get("#link-login-desktop").click();
     cy.get('#input-username').type('pertsa82');
     cy.get('#input-password').type('jes123');
@@ -77,8 +98,8 @@ describe('app core functionality', () => {
     cy.contains("Asked");
     cy.contains('My test file contains 5 tests. Is that possible to run a specific test rather than all the tests in the file?!?');
   });
-  it('edit a comment and view it', () => {
-    cy.visit("http://localhost:4173/");
+  it('edit a comment', () => {
+    cy.visit("/");
     cy.get("#link-login-desktop").click();
     cy.get('#input-username').type('pertsa82');
     cy.get('#input-password').type('jes123');
@@ -100,8 +121,23 @@ describe('app core functionality', () => {
       cy.contains('Modified');
     });
   });
+  it('like a comment', () => {
+    cy.visit("/");
+    cy.get("#link-login-desktop").click();
+    cy.get('#input-username').type('pertsa82');
+    cy.get('#input-password').type('jes123');
+    cy.get('#btn-login').click();
+    cy.contains("Just DebugIt!");
+    cy.contains('I need help with a problem!').click();
+    cy.get('.comment-full').within(() => {
+      cy.get('.btn-vote').click();
+      cy.get('.text-votes').contains('1');
+      cy.get('.btn-vote').click();
+      cy.get('.text-votes').contains('0');
+    });
+  });
   it('users profile page can be viewed', () => {
-    cy.visit("http://localhost:4173/");
+    cy.visit("/");
     cy.contains("Just DebugIt!");
     cy.contains("@pertsa82").click();
     cy.contains("Profile");
@@ -111,7 +147,7 @@ describe('app core functionality', () => {
     cy.contains("Account Age: 0 days");
   });
   it("user can change their information", () => {
-    cy.visit("http://localhost:4173/");
+    cy.visit("/");
     cy.get("#link-login-desktop").click();
     cy.get('#input-username').type('pertsa82');
     cy.get('#input-password').type('jes123');

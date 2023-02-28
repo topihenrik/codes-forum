@@ -20,12 +20,12 @@ function Header() {
   const handleLogout = () => {
     decodedTokenVar(null);
     localStorage.clear();
-    client.clearStore();
+    client.resetStore();
   };
 
   return (
     <Paper sx={{
-      width: '100%', boxSizing: 'border-box', position: 'sticky', top: '0', zIndex: '10',
+      width: '100%', boxSizing: 'border-box', position: 'sticky', top: '0', zIndex: '10', backgroundColor: 'secondary.dark',
     }}
     >
       <Container
@@ -33,14 +33,19 @@ function Header() {
           display: 'flex', justifyContent: 'space-between', boxSizing: 'border-box', padding: '8px',
         }}
       >
-        {/* Desktop */}
         <Link
           sx={{ color: 'inherit', textDecoration: 'none' }}
           component={RouterLink}
           to='/'
         >
-          <Typography variant='h4'>DebugIt()</Typography>
+          <Typography
+            sx={{ fontFamily: 'Roboto Condensed', fontWeight: '700' }}
+            variant='h4'
+          >
+            DebugIt!
+          </Typography>
         </Link>
+        {/* Desktop */}
         <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: '16px', alignItems: 'center' }}>
           {decodedToken
             ? (

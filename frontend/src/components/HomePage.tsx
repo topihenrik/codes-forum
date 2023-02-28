@@ -1,41 +1,51 @@
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import {
   Container, Box, Typography, Link, Button, Paper, Avatar, Chip,
 } from '@mui/material';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import QuestionAnswerOutlinedIcon from '@mui/icons-material/QuestionAnswerOutlined';
 import ContentLoader from 'react-content-loader';
 import { DateTime } from 'luxon';
 import { Link as RouterLink } from 'react-router-dom';
 import { GET_POSTS } from '../graphql/queries';
-import { type Post } from '../__generated__/graphql';
+import { Vote, type Post } from '../__generated__/graphql';
 import '@fontsource/roboto-condensed';
+import bgBlurSvg from '../assets/bg-blur-v2.svg';
+import { VOTE_POST } from '../graphql/mutations';
+import Voting from './Voting';
 
 interface PostCardProps {
   post: Post
 }
 
 function PostCard({ post }: PostCardProps) {
+  const [votePost] = useMutation(VOTE_POST);
+
+  const handleVoteSubmit = async (voteStatus: Vote) => {
+    try {
+      await votePost({ variables: { _id: post._id || '', voteStatus } });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  };
+
   return (
     <Paper sx={{ padding: '16px' }}>
       <Box sx={{ display: 'flex', gap: '16px' }}>
-        <Box>
-          <Box sx={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'fit-content',
-          }}
-          >
-            <ArrowUpwardIcon />
-            <Typography>
-              {post.voteCount}
-            </Typography>
-            <ArrowDownwardIcon />
-          </Box>
-          <Box sx={{ display: 'flex', gap: '4px' }}>
+        <Box sx={{
+          display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '16px',
+        }}
+        >
+          <Voting
+            voteCount={post.voteCount || 0}
+            voteStatus={post.voteStatus || Vote.None}
+            handleVoteSubmit={handleVoteSubmit}
+          />
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <QuestionAnswerOutlinedIcon />
             <Typography>
               {post.commentCount}
             </Typography>
-            <QuestionAnswerOutlinedIcon />
           </Box>
         </Box>
         <Box sx={{
@@ -178,24 +188,28 @@ function HomePage() {
   return (
     <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box sx={{
-        display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '16px', width: 'clamp(300px, 70%, 640px)',
+        display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '16px', width: 'clamp(300px, 85%, 640px)',
       }}
       >
         <Box sx={{
-          display: 'flex', flexDirection: 'column', justifyContent: 'center', backgroundImage: 'url(https://res.cloudinary.com/dqcnxy51g/image/upload/v1677187718/codes-forum/static/green-gradient_hr2aht.jpg)', backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '256px', padding: '32px',
+          display: 'flex', flexDirection: 'column', justifyContent: 'center', backgroundImage: `url(${bgBlurSvg})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '256px', padding: '32px',
         }}
         >
           <Typography
             variant='h4'
-            sx={{ color: 'black', fontWeight: '700', fontFamily: 'Roboto Condensed' }}
+            sx={{
+              color: '#059c3f', fontWeight: '700', fontFamily: 'Roboto Condensed', textShadow: '1px 1px 1px black',
+            }}
           >
             Having problems?
           </Typography>
           <Typography
             variant='h3'
-            sx={{ color: 'black', fontWeight: '700', fontFamily: 'Roboto Condensed' }}
+            sx={{
+              color: '#059c3f', fontWeight: '700', fontFamily: 'Roboto Condensed', textShadow: '1px 1px 1px black',
+            }}
           >
-            Just DebugIt! 🐜
+            Just DebugIt!
           </Typography>
         </Box>
         <Link

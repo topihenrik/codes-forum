@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "cross-env NODE_ENV=production node ./build/index.js",
-    "start:e2e": "node ./build/tests/init-mongodb.js && cross-env NODE_ENV=test node ./build/index.js",
+    "start:e2e": "cross-env NODE_ENV=test node ./build/index.js",
     "build": "graphql-codegen --config codegen.yml && tsc",
     "dev": "concurrently  --names \"CodeGen,TS,Nodemon\" -c \"bgYellow.black,bgBlue.black,bgMagenta.black\" \"graphql-codegen --watch './src/**/*.ts'\"  \"tsc -w \" \"cross-env NODE_ENV=development nodemon ./build/index.js \"",
     "lint": "eslint ."

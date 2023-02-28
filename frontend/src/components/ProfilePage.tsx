@@ -32,10 +32,10 @@ function PostRow({ post }: IPostRowProps) {
       <TableCell>
         {DateTime.fromJSDate(new Date(post.createdAt)).toLocaleString(DateTime.DATE_SHORT)}
       </TableCell>
-      <TableCell>
+      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
         {post.commentCount}
       </TableCell>
-      <TableCell>
+      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
         {post.voteCount}
       </TableCell>
     </TableRow>
@@ -62,7 +62,7 @@ function CommentRow({ comment }: ICommentRowProps) {
       <TableCell>
         {DateTime.fromJSDate(new Date(comment.createdAt)).toLocaleString(DateTime.DATE_SHORT)}
       </TableCell>
-      <TableCell>
+      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
         {comment.voteCount}
       </TableCell>
     </TableRow>
@@ -97,7 +97,7 @@ function ProfilePage() {
       }}
       >
         <Box sx={{
-          display: 'flex', flexDirection: 'column', gap: '16px', margin: { xs: '0 8px', sm: '0' }, width: 'clamp(300px, 70%, 576px)',
+          display: 'flex', flexDirection: 'column', gap: '16px', margin: { xs: '0 8px', sm: '0' }, width: 'clamp(300px, 85%, 640px)',
         }}
         >
           <ContentLoader
@@ -143,7 +143,7 @@ function ProfilePage() {
     }}
     >
       <Box sx={{
-        display: 'flex', flexDirection: 'column', gap: '16px', margin: { xs: '0 8px', sm: '0' }, width: 'clamp(300px, 70%, 576px)',
+        display: 'flex', flexDirection: 'column', gap: '16px', margin: { xs: '0 8px', sm: '0' }, width: 'clamp(300px, 85%, 640px)',
       }}
       >
         <Paper>
@@ -186,7 +186,7 @@ function ProfilePage() {
             </Box>
           </Box>
           <Paper sx={{
-            display: 'flex', justifyContent: 'space-between', backgroundColor: 'grey.900', borderTopLeftRadius: '0', borderTopRightRadius: '0', padding: '8px 16px',
+            display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', backgroundColor: 'secondary.light', borderTopLeftRadius: '0', borderTopRightRadius: '0', padding: '8px 16px',
           }}
           >
             <Typography>
@@ -228,10 +228,10 @@ function ProfilePage() {
                       <TableCell>
                         Date
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                         <ForumOutlinedIcon />
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                         <ThumbUpOutlinedIcon />
                       </TableCell>
                     </TableRow>
@@ -277,7 +277,7 @@ function ProfilePage() {
                       <TableCell>
                         Date
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                         <ThumbUpOutlinedIcon />
                       </TableCell>
                     </TableRow>
