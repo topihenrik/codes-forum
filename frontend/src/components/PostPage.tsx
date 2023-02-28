@@ -16,11 +16,12 @@ import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { GET_COMMENT, GET_COMMENTS, GET_POST } from '../graphql/queries';
-import { type Comment } from '../__generated__/graphql';
+import { Vote, type Comment } from '../__generated__/graphql';
 import { errorVar, decodedTokenVar } from '../cache';
 import DraftEditor from './DraftEditor';
-import { CREATE_COMMENT, EDIT_COMMENT } from '../graphql/mutations';
+import { CREATE_COMMENT, EDIT_COMMENT, VOTE_POST } from '../graphql/mutations';
 import Notification from './Notification';
+import Voting from './Voting';
 
 function FullPost() {
   const decodedToken = useReactiveVar(decodedTokenVar);
@@ -31,6 +32,7 @@ function FullPost() {
       _id: postId,
     },
   });
+  const [votePost] = useMutation(VOTE_POST);
 
   // Loading is complete and a post was not found -> Post 404
   if (!result.loading && (!(result?.data?.post))) {
@@ -78,6 +80,10 @@ function FullPost() {
   const { post } = result.data;
   const cleanBody = post.body ? DOMPurify.sanitize(draftToHtml(JSON.parse((post.body)))) : '';
 
+  const handleVoteSubmit = (voteStatus: Vote) => {
+    votePost({ variables: { _id: post._id || '', voteStatus } });
+  };
+
   return (
     <Box
       className='post'
@@ -96,11 +102,11 @@ function FullPost() {
           display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'fit-content',
         }}
         >
-          <ArrowUpwardIcon />
-          <Typography>
-            {post.voteCount}
-          </Typography>
-          <ArrowDownwardIcon />
+          <Voting
+            voteCount={post.voteCount || 0}
+            voteStatus={post.voteStatus || Vote.None}
+            handleVoteSubmit={handleVoteSubmit}
+          />
         </Box>
         <Box sx={{
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%',

@@ -3,7 +3,9 @@ import { DateTimeResolver } from 'graphql-scalars';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import config from '../config.js';
-import { type Comment as CommentType, Resolvers, type Post as PostType } from '../__generated__/resolvers-types';
+import {
+  type Comment as CommentType, Resolvers, type Post as PostType,
+} from '../__generated__/resolvers-types';
 import User from '../models/user.js';
 import Post from '../models/post.js';
 import Comment from '../models/comment.js';
@@ -28,7 +30,23 @@ const resolvers: Resolvers = {
   Query: {
     account: async (root, args, context) => context.currentUser,
     profile: async (root, args) => ({ id: args._id }),
-    posts: async () => Post.find({}),
+    posts: async (root, args, context) => {
+      const posts = await Post.find({}).lean();
+      if (!context.currentUser) {
+        return posts as PostType[];
+      }
+
+      const finalPosts = posts.map((post) => {
+        const votingResult = post.votes.find(
+          (id) => id.toString() === context.currentUser._id.toString(),
+        );
+        if (votingResult) {
+          return { ...post, voteStatus: 'UP' };
+        }
+        return { ...post, voteStatus: 'NONE' };
+      });
+      return finalPosts as PostType[];
+    },
     post: async (root, args) => Post.findById(args._id),
     comments: async (root, args) => Comment.find({ post: args.post }),
     comment: async (root, args) => Comment.findById(args._id),
@@ -158,6 +176,62 @@ const resolvers: Resolvers = {
       oldPost.body = args.body;
 
       return oldPost.save() as Promise<PostType>;
+    },
+    votePost: async (root, args, context) => {
+      if (!context.currentUser) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const thePost = await Post.findById(args._id);
+
+      if (!thePost) {
+        throw new GraphQLError('post doesn\'t exist', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const voteFound = thePost.votes.findIndex(
+        (userId) => userId.toString() === context.currentUser._id.toString(),
+      );
+
+      console.log(args.voteStatus);
+
+      if (args.voteStatus === 'NONE') {
+        // User wants to remove a vote
+        if (voteFound === -1) {
+          // There is no vote to remove
+          return null;
+        }
+        // There is a vote and it will be removed
+        const updatedPost = await Post.findOneAndUpdate(
+          { _id: args._id },
+          { $pullAll: { votes: [context.currentUser._id] }, $inc: { voteCount: -1 } },
+          { new: true, runValidators: true, context: 'query' },
+        ).lean();
+
+        return {
+          ...updatedPost,
+          voteStatus: 'NONE',
+        } as PostType;
+      // eslint-disable-next-line no-else-return
+      } else if (args.voteStatus === 'UP') {
+        // User wants to vote
+        if (voteFound === -1) {
+          // There is no vote and a vote will be added
+
+          const updatedPost = await Post.findOneAndUpdate(
+            { _id: args._id },
+            { $push: { votes: context.currentUser._id }, $inc: { voteCount: 1 } },
+            { new: true, runValidators: true, context: 'query' },
+          ).lean();
+
+          return {
+            ...updatedPost,
+            voteStatus: 'UP',
+          } as PostType;
+        }
+        // There is already a vote
+        return null;
+      }
+      return null;
     },
     createComment: async (root, args, context) => {
       if (!context.currentUser) {

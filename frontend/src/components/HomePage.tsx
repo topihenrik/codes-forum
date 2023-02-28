@@ -1,42 +1,46 @@
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import {
   Container, Box, Typography, Link, Button, Paper, Avatar, Chip,
 } from '@mui/material';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import QuestionAnswerOutlinedIcon from '@mui/icons-material/QuestionAnswerOutlined';
 import ContentLoader from 'react-content-loader';
 import { DateTime } from 'luxon';
 import { Link as RouterLink } from 'react-router-dom';
 import { GET_POSTS } from '../graphql/queries';
-import { type Post } from '../__generated__/graphql';
+import { Vote, type Post } from '../__generated__/graphql';
 import '@fontsource/roboto-condensed';
 import bgBlurSvg from '../assets/bg-blur-v2.svg';
+import { VOTE_POST } from '../graphql/mutations';
+import Voting from './Voting';
 
 interface PostCardProps {
   post: Post
 }
 
 function PostCard({ post }: PostCardProps) {
+  const [votePost] = useMutation(VOTE_POST);
+
+  const handleVoteSubmit = (voteStatus: Vote) => {
+    votePost({ variables: { _id: post._id || '', voteStatus } });
+  };
+
   return (
     <Paper sx={{ padding: '16px' }}>
       <Box sx={{ display: 'flex', gap: '16px' }}>
-        <Box>
-          <Box sx={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'fit-content',
-          }}
-          >
-            <ArrowUpwardIcon />
-            <Typography>
-              {post.voteCount}
-            </Typography>
-            <ArrowDownwardIcon />
-          </Box>
-          <Box sx={{ display: 'flex', gap: '4px' }}>
+        <Box sx={{
+          display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '16px',
+        }}
+        >
+          <Voting
+            voteCount={post.voteCount || 0}
+            voteStatus={post.voteStatus || Vote.None}
+            handleVoteSubmit={handleVoteSubmit}
+          />
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <QuestionAnswerOutlinedIcon />
             <Typography>
               {post.commentCount}
             </Typography>
-            <QuestionAnswerOutlinedIcon />
           </Box>
         </Box>
         <Box sx={{

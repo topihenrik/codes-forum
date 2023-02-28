@@ -73,6 +73,19 @@ export const EDIT_POST = gql(/* GraphQL */`
   }
 `);
 
+export const VOTE_POST = gql(/* GraphQL */`
+  mutation votePost($_id: String!, $voteStatus: Vote!) {
+    votePost(
+      _id: $_id
+      voteStatus: $voteStatus
+    ) {
+      _id
+      voteCount
+      voteStatus
+    }
+  }
+`);
+
 export const CREATE_COMMENT = gql(/* GraphQL */`
   mutation createComment($body: String!, $post: String!) {
     createComment(

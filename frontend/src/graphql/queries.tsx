@@ -54,6 +54,7 @@ export const GET_POSTS = gql(/* GraphQL */`
         username
       }
       voteCount
+      voteStatus
       commentCount
       createdAt
       updatedAt
@@ -72,6 +73,7 @@ export const GET_POST = gql(/* GraphQL */`
         username
       }
       voteCount
+      voteStatus
       createdAt
       updatedAt
     }

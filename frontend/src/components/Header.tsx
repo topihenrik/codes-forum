@@ -21,6 +21,7 @@ function Header() {
     decodedTokenVar(null);
     localStorage.clear();
     client.clearStore();
+    window.location.reload();
   };
 
   return (
