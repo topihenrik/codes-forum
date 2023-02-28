@@ -21,6 +21,7 @@ function Voting({ voteCount, voteStatus, handleVoteSubmit }: VotingProps) {
     >
       <Tooltip title={decodedToken ? '' : 'Login to vote'}>
         <ButtonBase
+          className='btn-vote'
           onClick={decodedToken
             ? () => { handleVoteSubmit(voteStatus === Vote.None ? Vote.Up : Vote.None); }
             : () => {}}
@@ -30,7 +31,9 @@ function Voting({ voteCount, voteStatus, handleVoteSubmit }: VotingProps) {
           />
         </ButtonBase>
       </Tooltip>
-      <Typography>
+      <Typography
+        className='text-votes'
+      >
         {voteCount}
       </Typography>
     </Box>

@@ -16,6 +16,8 @@ import typeDefs from './graphql/schema.js';
 import resolvers from './graphql/resolvers.js';
 import context from './context.js';
 
+import testdbRoute from './tests/database.js';
+
 import './mongodb.js';
 
 const schema = makeExecutableSchema({
@@ -27,7 +29,6 @@ const app = express();
 const httpServer = http.createServer(app);
 
 export interface MyContext {
-  // token?: string,
   currentUser: null | ICurrentUser
 }
 const server = new ApolloServer<MyContext>({
@@ -42,12 +43,13 @@ await server.start();
 app.use(morgan('dev'));
 app.use(cors());
 app.use(express.json());
+
 if (process.env.NODE_ENV === 'production') app.use(express.static('front'));
+if (process.env.NODE_ENV === 'test') app.use('/api/test/db', testdbRoute);
 
 app.use(
   '/graphql',
   expressMiddleware(server, {
-    // context: async ({ req }) => ({ token: req.headers.token }),
     context,
   }),
 );

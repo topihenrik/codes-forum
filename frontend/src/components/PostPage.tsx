@@ -91,7 +91,7 @@ function FullPost() {
 
   return (
     <Box
-      className='post'
+      className='post-full'
     >
       <Paper sx={{
         backgroundColor: 'primary.dark', borderBottomLeftRadius: '0', borderBottomRightRadius: '0', padding: { xs: '8px', sm: '16px' }, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '8px',
