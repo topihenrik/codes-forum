@@ -55,6 +55,8 @@ const typeDefs = gql`
         account: User
         profile(_id: String!): Profile
         posts: [Post!]
+        feedPosts(offset: Int!, limit: Int!): [Post!]
+        postsCount: Int
         post(_id: String!): Post
         comments(post: String!): [Comment!]
         comment(_id: String!): Comment

@@ -1,12 +1,13 @@
+import { useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import {
-  Container, Box, Typography, Link, Button, Paper, Avatar, Chip,
+  Container, Box, Typography, Link, Button, Paper, Avatar, Chip, Pagination,
 } from '@mui/material';
 import QuestionAnswerOutlinedIcon from '@mui/icons-material/QuestionAnswerOutlined';
 import ContentLoader from 'react-content-loader';
 import { DateTime } from 'luxon';
 import { Link as RouterLink } from 'react-router-dom';
-import { GET_POSTS } from '../graphql/queries';
+import { GET_FEED_POSTS, GET_POSTS_COUNT } from '../graphql/queries';
 import { Vote, type Post } from '../__generated__/graphql';
 import '@fontsource/roboto-condensed';
 import bgBlurSvg from '../assets/bg-blur-v2.svg';
@@ -70,7 +71,9 @@ function PostCard({ post }: PostCardProps) {
                 </Typography>
               </Link>
             </Box>
-            <Typography>
+            <Typography
+              sx={{ textAlign: 'end' }}
+            >
               {DateTime.fromJSDate(new Date(post.createdAt)).toLocaleString(DateTime.DATE_MED)}
             </Typography>
           </Box>
@@ -93,9 +96,26 @@ function PostCard({ post }: PostCardProps) {
 }
 
 function PostsList() {
-  const result = useQuery(GET_POSTS);
+  const limit = 5;
+  const [offset, setOffset] = useState(0);
+  const resultFeedPosts = useQuery(GET_FEED_POSTS, {
+    variables: {
+      offset,
+      limit,
+    },
+    notifyOnNetworkStatusChange: true,
+  });
+  const [page, setPage] = useState(1);
+  const resultPostCount = useQuery(GET_POSTS_COUNT);
 
-  if (result.error) {
+  const handlePageChange = async (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+    const newOffset = (value - 1) * limit;
+    await resultFeedPosts.fetchMore({ variables: { offset: newOffset, limit } });
+    setOffset(newOffset);
+  };
+
+  if (resultFeedPosts.error) {
     return (
       <Box>
         <Typography>
@@ -105,12 +125,12 @@ function PostsList() {
     );
   }
 
-  if (result.loading) {
+  if (resultFeedPosts.loading) {
     return (
       <Box>
         <ContentLoader
           style={{ width: '100%', height: '100%' }}
-          viewBox='0 0 640 840'
+          viewBox='0 0 640 947'
           backgroundColor='#262626'
           foregroundColor='#2a2a2a'
         >
@@ -120,46 +140,54 @@ function PostsList() {
             rx='5'
             ry='5'
             width='640'
-            height='155'
+            height='167'
           />
           <rect
             x='0'
-            y='171'
+            y='183'
             rx='5'
             ry='5'
             width='640'
-            height='155'
+            height='167'
           />
           <rect
             x='0'
-            y='342'
+            y='366'
             rx='5'
             ry='5'
             width='640'
-            height='155'
+            height='167'
           />
           <rect
             x='0'
-            y='513'
+            y='549'
             rx='5'
             ry='5'
             width='640'
-            height='155'
+            height='167'
           />
           <rect
             x='0'
-            y='684'
+            y='732'
             rx='5'
             ry='5'
             width='640'
-            height='155'
+            height='167'
+          />
+          <rect
+            x='0'
+            y='915'
+            rx='5'
+            ry='5'
+            width='640'
+            height='32'
           />
         </ContentLoader>
       </Box>
     );
   }
 
-  if ((!(result?.data?.posts))) {
+  if ((!(resultFeedPosts?.data?.feedPosts))) {
     return (
       <Box>
         <Typography>
@@ -174,12 +202,19 @@ function PostsList() {
       display: 'flex', flexDirection: 'column', gap: '16px',
     }}
     >
-      {result.data.posts.map((post) => (
+      {resultFeedPosts.data.feedPosts.map((post) => (
         <PostCard
           key={post._id}
           post={post}
         />
       ))}
+      <Pagination
+        count={resultPostCount.data?.postsCount
+          ? Math.ceil(resultPostCount.data.postsCount / limit)
+          : 0}
+        page={page}
+        onChange={handlePageChange}
+      />
     </Box>
   );
 }

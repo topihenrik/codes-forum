@@ -1,4 +1,5 @@
 import { InMemoryCache, makeVar } from '@apollo/client';
+import { offsetLimitPagination } from '@apollo/client/utilities';
 import { decodeToken, type IDecodedToken } from './utils';
 
 export const decodedTokenVar = makeVar<null | IDecodedToken>(decodeToken(localStorage.getItem('auth_token')));
@@ -17,6 +18,15 @@ const cache = new InMemoryCache({
         error: {
           read() {
             return errorVar();
+          },
+        },
+        feedPosts: {
+          ...offsetLimitPagination(),
+          read(existing, { args }) {
+            if (args && (typeof args.offset === 'number' && typeof args.limit === 'number')) {
+              return existing && existing.slice(args.offset, args.offset + args.limit);
+            }
+            return undefined;
           },
         },
       },

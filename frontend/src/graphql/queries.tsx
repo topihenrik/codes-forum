@@ -62,6 +62,31 @@ export const GET_POSTS = gql(/* GraphQL */`
   }
 `);
 
+export const GET_FEED_POSTS = gql(/* GraphQL */`
+  query feedPosts($offset: Int!, $limit: Int!) {
+    feedPosts(offset: $offset, limit: $limit) {
+      _id
+      title
+      body
+      author {
+        _id
+        username
+      }
+      voteCount
+      voteStatus
+      commentCount
+      createdAt
+      updatedAt
+    }
+  }
+`);
+
+export const GET_POSTS_COUNT = gql(/* GraphQL */`
+    query Query {
+    postsCount
+  }
+`);
+
 export const GET_POST = gql(/* GraphQL */`
   query post($_id: String!) {
     post(_id: $_id) {
