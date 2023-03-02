@@ -12,7 +12,7 @@ import { ServerError, useMutation, useReactiveVar } from '@apollo/client';
 import { decodedTokenVar } from '../cache';
 import DraftEditor from './DraftEditor';
 import { CREATE_POST } from '../graphql/mutations';
-import { GET_POSTS } from '../graphql/queries';
+import { GET_FEED_POSTS, GET_POSTS_COUNT } from '../graphql/queries';
 import Notification from './Notification';
 
 const TitleTextField = styled(TextField)({
@@ -48,8 +48,14 @@ function PostCreatePage() {
   const decodedToken = useReactiveVar(decodedTokenVar);
   const [createPost, result] = useMutation(
     CREATE_POST,
-    {
+    /* {
       refetchQueries: [{ query: GET_POSTS }],
+    }, */
+    {
+      refetchQueries: [
+        { query: GET_FEED_POSTS, variables: { offset: 0, limit: 10 } },
+        { query: GET_POSTS_COUNT },
+      ],
     },
   );
 
@@ -77,17 +83,17 @@ function PostCreatePage() {
   };
 
   const handlePostSubmit = async () => {
-    if (title.length <= 5) {
-      setError({ message: 'Title too short. Minimum length: 5' });
-      return;
-    }
-
-    if (editorState.getCurrentContent().getPlainText().length <= 50) {
-      setError({ message: 'Post too short. Minimum length: 50' });
-      return;
-    }
-
     try {
+      if (title.length <= 5) {
+        setError({ message: 'Title too short. Minimum length: 5' });
+        return;
+      }
+
+      if (editorState.getCurrentContent().getPlainText().length <= 50) {
+        setError({ message: 'Post too short. Minimum length: 50' });
+        return;
+      }
+
       await createPost(
         {
           variables: {

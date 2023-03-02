@@ -43,9 +43,9 @@ export const GET_PROFILE = gql(/* GraphQL */`
   }
 `);
 
-export const GET_POSTS = gql(/* GraphQL */`
-  query posts {
-    posts {
+export const GET_FEED_POSTS = gql(/* GraphQL */`
+  query feedPosts($offset: Int!, $limit: Int!) {
+    feedPosts(offset: $offset, limit: $limit) {
       _id
       title
       body
@@ -59,6 +59,12 @@ export const GET_POSTS = gql(/* GraphQL */`
       createdAt
       updatedAt
     }
+  }
+`);
+
+export const GET_POSTS_COUNT = gql(/* GraphQL */`
+    query Query {
+    postsCount
   }
 `);
 

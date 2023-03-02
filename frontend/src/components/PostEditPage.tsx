@@ -15,7 +15,7 @@ import {
 import { errorVar, decodedTokenVar } from '../cache';
 import DraftEditor from './DraftEditor';
 import { EDIT_POST } from '../graphql/mutations';
-import { GET_POSTS, GET_POST } from '../graphql/queries';
+import { GET_POST } from '../graphql/queries';
 import Notification from './Notification';
 
 const TitleTextField = styled(TextField)({
@@ -58,8 +58,15 @@ function PostEditPage() {
   });
   const [editPost, editResult] = useMutation(
     EDIT_POST,
-    {
+    /* {
       refetchQueries: [{ query: GET_POSTS }, { query: GET_POST, variables: { _id: postid } }],
+    }, */
+    {
+      refetchQueries: [
+        { query: GET_POST, variables: { _id: postid } },
+        /* { query: GET_FEED_POSTS, variables: { offset: 0, limit: 10 } },
+        { query: GET_POSTS_COUNT }, */
+      ],
     },
   );
 
@@ -113,17 +120,17 @@ function PostEditPage() {
   };
 
   const handlePostSubmit = async () => {
-    if (title.length <= 5) {
-      setError({ message: 'Title too short. Minimum length: 5' });
-      return;
-    }
-
-    if (editorState.getCurrentContent().getPlainText().length <= 50) {
-      setError({ message: 'Post too short. Minimum length: 50' });
-      return;
-    }
-
     try {
+      if (title.length <= 5) {
+        setError({ message: 'Title too short. Minimum length: 5' });
+        return;
+      }
+
+      if (editorState.getCurrentContent().getPlainText().length <= 50) {
+        setError({ message: 'Post too short. Minimum length: 50' });
+        return;
+      }
+
       await editPost(
         {
           variables: {

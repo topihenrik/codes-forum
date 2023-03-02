@@ -30,8 +30,12 @@ const resolvers: Resolvers = {
   Query: {
     account: async (root, args, context) => context.currentUser,
     profile: async (root, args) => ({ id: args._id }),
-    posts: async (root, args, context) => {
-      const posts = await Post.find({}).lean();
+    feedPosts: async (root, args, context) => {
+      const posts = await Post.find({})
+        .sort({ createdAt: -1 })
+        .skip(args.offset)
+        .limit(args.limit)
+        .lean();
       if (!context.currentUser) {
         return posts as PostType[];
       }
@@ -47,6 +51,7 @@ const resolvers: Resolvers = {
       });
       return finalPosts as PostType[];
     },
+    postsCount: async () => Post.find({}).count(),
     post: async (root, args, context) => {
       const thepost = await Post.findById(args._id).lean();
       if (!context.currentUser) {
