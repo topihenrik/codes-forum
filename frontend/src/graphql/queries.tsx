@@ -43,25 +43,6 @@ export const GET_PROFILE = gql(/* GraphQL */`
   }
 `);
 
-export const GET_POSTS = gql(/* GraphQL */`
-  query posts {
-    posts {
-      _id
-      title
-      body
-      author {
-        _id
-        username
-      }
-      voteCount
-      voteStatus
-      commentCount
-      createdAt
-      updatedAt
-    }
-  }
-`);
-
 export const GET_FEED_POSTS = gql(/* GraphQL */`
   query feedPosts($offset: Int!, $limit: Int!) {
     feedPosts(offset: $offset, limit: $limit) {

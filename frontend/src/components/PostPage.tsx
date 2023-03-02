@@ -203,9 +203,14 @@ function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
       _id: commentId,
     },
   });
-  const [editComment, editResult] = useMutation(EDIT_COMMENT, {
-    refetchQueries: [{ query: GET_COMMENTS, variables: { post: postid } }],
-  });
+  const [editComment, editResult] = useMutation(
+    EDIT_COMMENT,
+    {
+      refetchQueries: [
+        { query: GET_COMMENTS, variables: { post: postid } },
+      ],
+    },
+  );
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const decodedToken = useReactiveVar(decodedTokenVar);
   const [error, setError] = useState<IError | null >(null);
@@ -242,12 +247,12 @@ function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
   };
 
   const handleCommentSubmit = async () => {
-    if (editorState.getCurrentContent().getPlainText().length <= 10) {
-      setError({ message: 'Comment too short. Minimum length: 10' });
-      return;
-    }
-
     try {
+      if (editorState.getCurrentContent().getPlainText().length <= 10) {
+        setError({ message: 'Comment too short. Minimum length: 10' });
+        return;
+      }
+
       await editComment(
         {
           variables: {
@@ -524,9 +529,14 @@ interface IError {
 
 function CommentCreate() {
   const postid = useParams().id || '';
-  const [createComment, result] = useMutation(CREATE_COMMENT, {
-    refetchQueries: [{ query: GET_COMMENTS, variables: { post: postid } }],
-  });
+  const [createComment, result] = useMutation(
+    CREATE_COMMENT,
+    {
+      refetchQueries: [
+        { query: GET_COMMENTS, variables: { post: postid } },
+      ],
+    },
+  );
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const decodedToken = useReactiveVar(decodedTokenVar);
   const [error, setError] = useState<IError | null >(null);
@@ -554,12 +564,12 @@ function CommentCreate() {
   };
 
   const handleCommentSubmit = async () => {
-    if (editorState.getCurrentContent().getPlainText().length <= 10) {
-      setError({ message: 'Comment too short. Minimum length: 10' });
-      return;
-    }
-
     try {
+      if (editorState.getCurrentContent().getPlainText().length <= 10) {
+        setError({ message: 'Comment too short. Minimum length: 10' });
+        return;
+      }
+
       await createComment(
         {
           variables: {

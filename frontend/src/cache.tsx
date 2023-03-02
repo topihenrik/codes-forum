@@ -2,6 +2,7 @@ import { InMemoryCache, makeVar } from '@apollo/client';
 import { offsetLimitPagination } from '@apollo/client/utilities';
 import { decodeToken, type IDecodedToken } from './utils';
 
+export const feedPostsPageVar = makeVar<number>(1);
 export const decodedTokenVar = makeVar<null | IDecodedToken>(decodeToken(localStorage.getItem('auth_token')));
 export const errorVar = makeVar<string>('');
 
@@ -10,6 +11,11 @@ const cache = new InMemoryCache({
   typePolicies: {
     Query: {
       fields: {
+        feedPostsPage: {
+          read() {
+            return feedPostsPageVar();
+          },
+        },
         decodedToken: {
           read() {
             return decodedTokenVar();

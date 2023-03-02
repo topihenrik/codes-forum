@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import {
   Container, Box, Typography, Link, Button, Paper, Avatar, Chip, Pagination,
 } from '@mui/material';
@@ -13,6 +13,7 @@ import '@fontsource/roboto-condensed';
 import bgBlurSvg from '../assets/bg-blur-v2.svg';
 import { VOTE_POST } from '../graphql/mutations';
 import Voting from './Voting';
+import { feedPostsPageVar } from '../cache';
 
 interface PostCardProps {
   post: Post
@@ -96,8 +97,9 @@ function PostCard({ post }: PostCardProps) {
 }
 
 function PostsList() {
+  const feedPostsPage = useReactiveVar(feedPostsPageVar);
   const limit = 5;
-  const [offset, setOffset] = useState(0);
+  const [offset, setOffset] = useState((feedPostsPage - 1) * limit);
   const resultFeedPosts = useQuery(GET_FEED_POSTS, {
     variables: {
       offset,
@@ -105,14 +107,18 @@ function PostsList() {
     },
     notifyOnNetworkStatusChange: true,
   });
-  const [page, setPage] = useState(1);
   const resultPostCount = useQuery(GET_POSTS_COUNT);
 
   const handlePageChange = async (event: React.ChangeEvent<unknown>, value: number) => {
-    setPage(value);
-    const newOffset = (value - 1) * limit;
-    await resultFeedPosts.fetchMore({ variables: { offset: newOffset, limit } });
-    setOffset(newOffset);
+    try {
+      feedPostsPageVar(value);
+      const newOffset = (value - 1) * limit;
+      await resultFeedPosts.fetchMore({ variables: { offset: newOffset, limit } });
+      setOffset(newOffset);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
   };
 
   if (resultFeedPosts.error) {
@@ -212,7 +218,7 @@ function PostsList() {
         count={resultPostCount.data?.postsCount
           ? Math.ceil(resultPostCount.data.postsCount / limit)
           : 0}
-        page={page}
+        page={feedPostsPage}
         onChange={handlePageChange}
       />
     </Box>

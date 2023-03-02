@@ -54,7 +54,6 @@ const typeDefs = gql`
     type Query {
         account: User
         profile(_id: String!): Profile
-        posts: [Post!]
         feedPosts(offset: Int!, limit: Int!): [Post!]
         postsCount: Int
         post(_id: String!): Post

@@ -57,6 +57,17 @@ export const CREATE_POST = gql(/* GraphQL */`
       body: $body
     ) {
       _id
+      title
+      body
+      author {
+        _id
+        username
+      }
+      voteCount
+      voteStatus
+      commentCount
+      createdAt
+      updatedAt
     }
   }
 `);
@@ -69,6 +80,17 @@ export const EDIT_POST = gql(/* GraphQL */`
       body: $body
     ) {
       _id
+      title
+      body
+      author {
+        _id
+        username
+      }
+      voteCount
+      voteStatus
+      commentCount
+      createdAt
+      updatedAt
     }
   }
 `);
@@ -93,6 +115,15 @@ export const CREATE_COMMENT = gql(/* GraphQL */`
       post: $post
     ) {
       _id
+      body
+      author {
+        _id
+        username
+      }
+      voteCount
+      voteStatus
+      createdAt
+      updatedAt
     }
   }
 `);
@@ -104,6 +135,15 @@ export const EDIT_COMMENT = gql(/* GraphQL */`
       body: $body
     ) {
       _id
+      body
+      author {
+        _id
+        username
+      }
+      voteCount
+      voteStatus
+      createdAt
+      updatedAt
     }
   }
 `);

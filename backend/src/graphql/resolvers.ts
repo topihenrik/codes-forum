@@ -30,23 +30,6 @@ const resolvers: Resolvers = {
   Query: {
     account: async (root, args, context) => context.currentUser,
     profile: async (root, args) => ({ id: args._id }),
-    posts: async (root, args, context) => {
-      const posts = await Post.find({}).lean();
-      if (!context.currentUser) {
-        return posts as PostType[];
-      }
-
-      const finalPosts = posts.map((post) => {
-        const votingResult = post.votes.find(
-          (id) => id.toString() === context.currentUser._id.toString(),
-        );
-        if (votingResult) {
-          return { ...post, voteStatus: 'UP' };
-        }
-        return { ...post, voteStatus: 'NONE' };
-      });
-      return finalPosts as PostType[];
-    },
     feedPosts: async (root, args, context) => {
       const posts = await Post.find({})
         .sort({ createdAt: -1 })
