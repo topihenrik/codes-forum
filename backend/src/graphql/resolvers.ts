@@ -1,5 +1,5 @@
 import { GraphQLError } from 'graphql';
-import { DateTimeResolver } from 'graphql-scalars';
+import { DateTimeResolver, ObjectIDResolver } from 'graphql-scalars';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -16,6 +16,7 @@ import { uploadImage, destroyImage } from '../cloudinary.js';
 const resolvers: Resolvers = {
   DateTime: DateTimeResolver,
   Upload: GraphQLUpload,
+  ObjectID: ObjectIDResolver,
   Profile: {
     user: async (root) => User.findById(root.id),
     postCount: async (root) => Post.find({ author: root.id }).count(),
@@ -28,6 +29,7 @@ const resolvers: Resolvers = {
     commentCount: async (root) => Comment.find({ post: root._id }).count(),
   },
   Comment: {
+    post: async (root) => Post.findById(root.post),
     author: async (root) => User.findById(root.author),
   },
   Query: {
@@ -217,6 +219,7 @@ const resolvers: Resolvers = {
         {
           title: args.title,
           body: args.body,
+          tags: args.tags,
           author: context.currentUser._id,
         },
       );
@@ -239,6 +242,7 @@ const resolvers: Resolvers = {
 
       oldPost.title = args.title;
       oldPost.body = args.body;
+      oldPost.tags = args.tags;
 
       return oldPost.save() as Promise<PostType>;
     },

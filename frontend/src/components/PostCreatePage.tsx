@@ -1,6 +1,7 @@
 import {
   Container, Box, Paper, TextField,
 } from '@mui/material';
+import { TagsInput } from 'react-tag-input-component';
 import { styled } from '@mui/material/styles';
 import { convertToRaw, EditorState } from 'draft-js';
 import { useEffect, useState } from 'react';
@@ -42,6 +43,7 @@ interface IError {
 
 function PostCreatePage() {
   const [title, setTitle] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const navigate = useNavigate();
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const [error, setError] = useState<IError | null >(null);
@@ -58,6 +60,15 @@ function PostCreatePage() {
       ],
     },
   );
+
+  const handleTagsOnChange = (newTags: string[]) => {
+    setTags(newTags);
+  };
+
+  const beforeAddTagsValidate = (newTag: string, existingTags: string[]) => {
+    if (newTag.length <= 16 && existingTags.length < 3) return true;
+    return false;
+  };
 
   // After succesful post creation -> Navigate to the post site
   useEffect(() => {
@@ -98,6 +109,7 @@ function PostCreatePage() {
         {
           variables: {
             title,
+            tags,
             body: JSON.stringify(convertToRaw(editorState.getCurrentContent())),
           },
         },
@@ -150,19 +162,32 @@ function PostCreatePage() {
             />
           )}
           <Box sx={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '8px',
+            display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px 0 0 0',
           }}
           >
-            <Button
-              variant='contained'
-              onClick={handlePostSubmit}
+            <Box sx={{ width: 'fit-content' }}>
+              <TagsInput
+                value={tags}
+                onChange={handleTagsOnChange}
+                beforeAddValidate={beforeAddTagsValidate}
+                placeHolder='Tags (max: 3)'
+              />
+            </Box>
+            <Box sx={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
+            }}
             >
-              Submit
-            </Button>
-            <Typography>
-              author: @
-              {decodedToken && decodedToken.username}
-            </Typography>
+              <Button
+                variant='contained'
+                onClick={handlePostSubmit}
+              >
+                Submit
+              </Button>
+              <Typography>
+                author: @
+                {decodedToken && decodedToken.username}
+              </Typography>
+            </Box>
           </Box>
         </Paper>
       </Box>

@@ -56,14 +56,16 @@ export const LOGIN_USER = gql(/* GraphQL */`
 `);
 
 export const CREATE_POST = gql(/* GraphQL */`
-  mutation createPost($title: String!, $body: String!) {
+  mutation createPost($title: String!, $body: String!, $tags: [String]!) {
     createPost(
       title: $title
       body: $body
+      tags: $tags
     ) {
       _id
       title
       body
+      tags
       author {
         _id
         username
@@ -78,11 +80,12 @@ export const CREATE_POST = gql(/* GraphQL */`
 `);
 
 export const EDIT_POST = gql(/* GraphQL */`
-  mutation editPost($_id: String!, $title: String!, $body: String!) {
+  mutation editPost($_id: String!, $title: String!, $body: String!, $tags: [String]!) {
     editPost(
       _id: $_id
       title: $title
       body: $body
+      tags: $tags
     ) {
       _id
       title

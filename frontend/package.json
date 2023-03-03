@@ -29,7 +29,8 @@
     "react-content-loader": "^6.2.0",
     "react-dom": "^18.2.0",
     "react-draft-wysiwyg": "^1.15.0",
-    "react-router-dom": "^6.8.1"
+    "react-router-dom": "^6.8.1",
+    "react-tag-input-component": "^2.0.2"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^3.0.0",
