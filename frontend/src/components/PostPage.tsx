@@ -3,7 +3,7 @@ import {
   ServerError, useMutation, useQuery, useReactiveVar,
 } from '@apollo/client';
 import {
-  Container, Box, Typography, Paper, Link, Button, Divider, Avatar, ButtonBase,
+  Container, Box, Typography, Paper, Link, Button, Divider, Avatar, ButtonBase, Chip,
 } from '@mui/material';
 import DOMPurify from 'dompurify';
 import { DateTime } from 'luxon';
@@ -114,12 +114,20 @@ function FullPost() {
           />
         </Box>
         <Box sx={{
-          display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%',
+          display: 'flex', flexDirection: 'column', gap: '16px', width: '100%',
         }}
         >
           <Box
             dangerouslySetInnerHTML={{ __html: cleanBody }}
           />
+          <Box sx={{ display: 'flex', gap: '8px' }}>
+            {post.tags?.map((tag) => (
+              <Chip
+                key={crypto.randomUUID()}
+                label={tag}
+              />
+            ))}
+          </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             {(decodedToken?._id === post.author?._id) && (
               <Box sx={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>

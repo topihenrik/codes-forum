@@ -5,6 +5,7 @@ import { styled } from '@mui/material/styles';
 import { convertToRaw, convertFromRaw, EditorState } from 'draft-js';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { TagsInput } from 'react-tag-input-component';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -45,6 +46,7 @@ interface IError {
 
 function PostEditPage() {
   const [title, setTitle] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const navigate = useNavigate();
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const [error, setError] = useState<IError | null >(null);
@@ -94,6 +96,9 @@ function PostEditPage() {
     if (oldPostResult?.data?.post?.title) {
       setTitle(oldPostResult.data.post.title);
     }
+    if (oldPostResult.data?.post?.tags) {
+      setTags(oldPostResult.data.post.tags);
+    }
   }, [oldPostResult.data, setEditorState]);
 
   // After succesful post edit -> Navigate back to post site
@@ -114,6 +119,15 @@ function PostEditPage() {
       }
     }
   }, [editResult.error]);
+
+  const handleTagsOnChange = (newTags: string[]) => {
+    setTags(newTags);
+  };
+
+  const beforeAddTagsValidate = (newTag: string, existingTags: string[]) => {
+    if (newTag.length <= 16 && existingTags.length < 3) return true;
+    return false;
+  };
 
   const handleEditorChange = (newEditorState: EditorState) => {
     setEditorState(newEditorState);
@@ -137,6 +151,7 @@ function PostEditPage() {
             _id: postid,
             title,
             body: JSON.stringify(convertToRaw(editorState.getCurrentContent())),
+            tags,
           },
         },
       );
@@ -222,19 +237,32 @@ function PostEditPage() {
             />
           )}
           <Box sx={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '8px',
+            display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px 0 0 0',
           }}
           >
-            <Button
-              variant='contained'
-              onClick={handlePostSubmit}
+            <Box sx={{ width: 'fit-content' }}>
+              <TagsInput
+                value={tags}
+                onChange={handleTagsOnChange}
+                beforeAddValidate={beforeAddTagsValidate}
+                placeHolder='Tags (max: 3)'
+              />
+            </Box>
+            <Box sx={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
+            }}
             >
-              Update
-            </Button>
-            <Typography>
-              author: @
-              {decodedToken && decodedToken.username}
-            </Typography>
+              <Button
+                variant='contained'
+                onClick={handlePostSubmit}
+              >
+                Update
+              </Button>
+              <Typography>
+                author: @
+                {decodedToken && decodedToken.username}
+              </Typography>
+            </Box>
           </Box>
         </Paper>
       </Box>

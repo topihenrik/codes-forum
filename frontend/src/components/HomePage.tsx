@@ -54,41 +54,48 @@ function PostCard({ post }: PostCardProps) {
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%',
         }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <Avatar
-                sx={{ height: '32px', width: '32px', borderRadius: '16px' }}
-                alt='avatar'
-                src={post.author?.avatar?.url || ''}
-              />
-              <Link
-                sx={{ color: 'inherit' }}
-                component={RouterLink}
-                to={`/profile/${post.author?._id}`}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <Avatar
+                  sx={{ height: '32px', width: '32px', borderRadius: '16px' }}
+                  alt='avatar'
+                  src={post.author?.avatar?.url || ''}
+                />
+                <Link
+                  sx={{ color: 'inherit' }}
+                  component={RouterLink}
+                  to={`/profile/${post.author?._id}`}
+                >
+                  <Typography>
+                    @
+                    {post.author?.username}
+                  </Typography>
+                </Link>
+              </Box>
+              <Typography
+                sx={{ textAlign: 'end' }}
               >
-                <Typography>
-                  @
-                  {post.author?.username}
-                </Typography>
-              </Link>
+                {DateTime.fromJSDate(new Date(post.createdAt)).toLocaleString(DateTime.DATE_MED)}
+              </Typography>
             </Box>
-            <Typography
-              sx={{ textAlign: 'end' }}
+            <Link
+              sx={{ color: 'inherit' }}
+              component={RouterLink}
+              to={`/post/${post._id}`}
             >
-              {DateTime.fromJSDate(new Date(post.createdAt)).toLocaleString(DateTime.DATE_MED)}
-            </Typography>
+              <Typography variant='h6'>
+                {post.title}
+              </Typography>
+            </Link>
           </Box>
-          <Link
-            sx={{ color: 'inherit' }}
-            component={RouterLink}
-            to={`/post/${post._id}`}
-          >
-            <Typography>{post.title}</Typography>
-          </Link>
           <Box sx={{ display: 'flex', gap: '8px' }}>
-            <Chip label='Tag 1' />
-            <Chip label='Tag 2' />
-            <Chip label='Tag 3' />
+            {post.tags?.map((tag) => (
+              <Chip
+                key={crypto.randomUUID()}
+                label={tag}
+              />
+            ))}
           </Box>
         </Box>
       </Box>

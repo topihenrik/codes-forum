@@ -54,3 +54,15 @@ pre {
 .draftjs-wrapper-comment {
     min-height: 320px;
 }
+
+.rti--container {
+    color: black !important;
+}
+
+.rti--input {
+    width: 144px !important;
+}
+
+.rti--tag {
+    background-color: #adadad !important;
+}

@@ -4,6 +4,7 @@ export interface IPost {
   _id: string,
   title: string,
   body: string,
+  tags: string[],
   author: Schema.Types.ObjectId,
   votes: [Schema.Types.ObjectId],
   voteCount: number,
@@ -15,6 +16,7 @@ const PostSchema = new Schema<IPost>(
   {
     title: { type: String, required: true },
     body: { type: String, required: true },
+    tags: { type: [String] },
     author: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
     votes: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
     voteCount: { type: Number, default: 0 },

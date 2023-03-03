@@ -55,6 +55,7 @@ export const GET_FEED_POSTS = gql(/* GraphQL */`
       _id
       title
       body
+      tags
       author {
         _id
         username
@@ -83,6 +84,7 @@ export const GET_POST = gql(/* GraphQL */`
       _id
       title
       body
+      tags
       author {
         _id
         username

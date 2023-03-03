@@ -3,6 +3,7 @@ import gql from 'graphql-tag';
 const typeDefs = gql`
     scalar DateTime
     scalar Upload
+    scalar ObjectID
 
     enum Vote {
         NONE
@@ -34,6 +35,7 @@ const typeDefs = gql`
         _id: ID
         title: String
         body: String
+        tags: [String!]
         author: User
         voteCount: Int
         voteStatus: Vote
@@ -93,11 +95,13 @@ const typeDefs = gql`
         createPost(
             title: String!
             body: String!
+            tags: [String]!
         ): Post
         editPost(
             _id: String!
             title: String!
             body: String!
+            tags: [String]!
         ): Post
         votePost(
             _id: String!
