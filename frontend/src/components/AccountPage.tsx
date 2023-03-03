@@ -27,7 +27,7 @@ interface INotification {
 function BasicInfoForm({ data, loading }: BasicInfoFormProps) {
   const decodedToken = useReactiveVar(decodedTokenVar);
   const [editBasic, result] = useMutation(EDIT_BASIC_USER);
-  const [file, setFile] = useState<File | null>(null);
+  const [avatar, setAvatar] = useState<File | undefined>(undefined);
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [notification, setNotification] = useState<INotification | null>(null);
@@ -60,16 +60,22 @@ function BasicInfoForm({ data, loading }: BasicInfoFormProps) {
   const handleFileChange = (event: React.ChangeEvent) => {
     const inputFileElement = event.target as HTMLInputElement;
     if (!inputFileElement.files) {
-      setFile(null);
+      setAvatar(undefined);
       return;
     }
-    setFile(inputFileElement.files[0]);
+    setAvatar(inputFileElement.files[0]);
   };
 
   const handleEditBasicSubmit = async (event: React.FormEvent) => {
     try {
       event.preventDefault();
-      await editBasic({ variables: { _id: decodedToken?._id || '', username, bio } });
+      await editBasic(
+        {
+          variables: {
+            _id: decodedToken?._id || '', username, bio, avatar,
+          },
+        },
+      );
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
@@ -151,7 +157,7 @@ function BasicInfoForm({ data, loading }: BasicInfoFormProps) {
               component='label'
             >
               <FileUploadIcon />
-              {file ? file.name : 'Upload Avatar (max: 2MB)'}
+              {avatar ? avatar.name : 'Upload Avatar (max: 2MB)'}
               <input
                 type='file'
                 hidden
@@ -378,7 +384,7 @@ function AccountPage() {
                   <Avatar
                     sx={{ height: '256px', width: '256px', borderRadius: '8px' }}
                     alt='avatar'
-                    src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
+                    src={result.data?.account?.avatar?.url || ''}
                   />
                   <Link
                     sx={{ color: 'inherit' }}
@@ -388,8 +394,6 @@ function AccountPage() {
                     <Typography>
                       @
                       {result.data?.account?.username}
-                      {' '}
-                      - Your Profile
                     </Typography>
                   </Link>
                 </>

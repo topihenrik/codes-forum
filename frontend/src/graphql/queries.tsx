@@ -5,6 +5,9 @@ export const GET_ACCOUNT = gql(/* GraphQL */`
       account {
         _id
         username
+        avatar {
+          url
+        }
         bio
       }
   }
@@ -35,8 +38,11 @@ export const GET_PROFILE = gql(/* GraphQL */`
       }
       user {
         _id
-        bio
         username
+        avatar {
+          url
+        }
+        bio
         createdAt
       }
     }
@@ -52,6 +58,9 @@ export const GET_FEED_POSTS = gql(/* GraphQL */`
       author {
         _id
         username
+        avatar {
+          url
+        }
       }
       voteCount
       voteStatus
@@ -77,6 +86,9 @@ export const GET_POST = gql(/* GraphQL */`
       author {
         _id
         username
+        avatar {
+          url
+        }
       }
       voteCount
       voteStatus
@@ -94,6 +106,9 @@ export const GET_COMMENTS = gql(/* GraphQL */`
       author {
         _id
         username
+        avatar {
+          url
+        }
       }
       voteCount
       voteStatus

@@ -1,5 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { DateTimeResolver } from 'graphql-scalars';
+import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import config from '../config.js';
@@ -10,9 +11,11 @@ import User from '../models/user.js';
 import Post from '../models/post.js';
 import Comment from '../models/comment.js';
 import { IToken } from '../types';
+import { uploadImage, destroyImage } from '../cloudinary.js';
 
 const resolvers: Resolvers = {
   DateTime: DateTimeResolver,
+  Upload: GraphQLUpload,
   Profile: {
     user: async (root) => User.findById(root.id),
     postCount: async (root) => Post.find({ author: root.id }).count(),
@@ -95,10 +98,21 @@ const resolvers: Resolvers = {
         throw new GraphQLError("passwords don't match", { extensions: { code: 'BAD_USER_INPUT' } });
       }
 
+      const uploadResult = await uploadImage(await args.avatar);
+      const theavatar = (uploadResult?.url && uploadResult?.public_id)
+        ? { url: uploadResult.url, public_id: uploadResult.public_id }
+        : { url: undefined, public_id: undefined };
+
       const hashedPassword = await bcrypt.hash(args.password, 10);
 
       try {
-        const newUser = new User({ username: args.username, password: hashedPassword });
+        const newUser = new User(
+          {
+            username: args.username,
+            password: hashedPassword,
+            avatar: theavatar,
+          },
+        );
         return await newUser.save();
       } catch (error) {
         throw new GraphQLError(error.message, { extensions: { code: 'BAD_USER_INPUT' } });
@@ -129,6 +143,24 @@ const resolvers: Resolvers = {
       }
 
       oldUser.bio = args.bio;
+
+      const oldAvatarPublicId = oldUser?.avatar?.public_id;
+      const uploadResult = await uploadImage(await args.avatar);
+      const theavatar = (uploadResult?.url && uploadResult?.public_id)
+        ? { url: uploadResult.url, public_id: uploadResult.public_id }
+        : { url: undefined, public_id: undefined };
+
+      if (oldAvatarPublicId) {
+        // Old avatar exists
+        if (theavatar?.public_id) {
+          // New avatar exists -> Delete old
+          await destroyImage(oldAvatarPublicId);
+          oldUser.avatar = theavatar;
+        }
+      } else {
+        // Old avatar doesnt exist
+        oldUser.avatar = theavatar;
+      }
 
       return oldUser.save();
     },

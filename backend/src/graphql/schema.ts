@@ -2,15 +2,21 @@ import gql from 'graphql-tag';
 
 const typeDefs = gql`
     scalar DateTime
+    scalar Upload
 
     enum Vote {
         NONE
         UP
     }
 
+    type Avatar {
+        url: String
+    }
+
     type User {
         _id: ID
         username: String
+        avatar: Avatar
         bio: String
         createdAt: DateTime
     }
@@ -66,11 +72,13 @@ const typeDefs = gql`
             username: String! @constraint(minLength: 3, maxLength: 255)
             password: String! @constraint(minLength: 3, maxLength: 255)
             password_confirm: String! @constraint(minLength: 3, maxLength: 255)
+            avatar: Upload
         ): User
         editBasicUser(
             _id: String!
             username: String!
             bio: String!
+            avatar: Upload
         ): User
         editPasswordUser(
             _id: String!

@@ -167,7 +167,7 @@ function ProfilePage() {
                 <Avatar
                   sx={{ height: { xs: '80px', sm: '128px' }, width: { xs: '80px', sm: '128px' }, borderRadius: '8px' }}
                   alt='avatar'
-                  src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
+                  src={result.data.profile.user?.avatar?.url || ''}
                 />
                 <Typography>
                   @

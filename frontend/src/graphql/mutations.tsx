@@ -1,11 +1,12 @@
 import { gql } from '../__generated__/gql';
 
 export const CREATE_USER = gql(/* GraphQL */`
-  mutation createUser($username: String!, $password: String!, $password_confirm: String!) {
+  mutation createUser($username: String!, $password: String!, $password_confirm: String!, $avatar: Upload) {
     createUser(
       username: $username
       password: $password
       password_confirm: $password_confirm
+      avatar: $avatar
     ) {
       _id
     }
@@ -13,14 +14,18 @@ export const CREATE_USER = gql(/* GraphQL */`
 `);
 
 export const EDIT_BASIC_USER = gql(/* GraphQL */`
-  mutation editBasicUser($_id: String!, $username: String!, $bio: String!) {
+  mutation editBasicUser($_id: String!, $username: String!, $bio: String!, $avatar: Upload) {
     editBasicUser(
       _id: $_id
       username: $username
       bio: $bio
+      avatar: $avatar
     ) {
       _id
       username
+      avatar {
+          url
+        }
       bio
     }
   }

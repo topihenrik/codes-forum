@@ -19,7 +19,7 @@ function SignupPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [file, setFile] = useState<File | null>(null);
+  const [avatar, setAvatar] = useState<File | undefined>(undefined);
   const [error, setError] = useState<IError | null >(null);
 
   if (result.data) {
@@ -40,16 +40,22 @@ function SignupPage() {
   const handleFileChange = (event: React.ChangeEvent) => {
     const inputFileElement = event.target as HTMLInputElement;
     if (!inputFileElement.files) {
-      setFile(null);
+      setAvatar(undefined);
       return;
     }
-    setFile(inputFileElement.files[0]);
+    setAvatar(inputFileElement.files[0]);
   };
 
   const handleSignupSubmit = async (event: React.FormEvent) => {
     try {
       event.preventDefault();
-      await signup({ variables: { username, password, password_confirm: passwordConfirm } });
+      await signup(
+        {
+          variables: {
+            username, password, password_confirm: passwordConfirm, avatar,
+          },
+        },
+      );
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
@@ -98,7 +104,7 @@ function SignupPage() {
             component='label'
           >
             <FileUploadIcon />
-            {file ? file.name : 'Upload Avatar (max: 2MB)'}
+            {avatar ? avatar.name : 'Upload Avatar (max: 2MB)'}
             <input
               type='file'
               hidden

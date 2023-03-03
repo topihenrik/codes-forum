@@ -171,7 +171,7 @@ function FullPost() {
               <Avatar
                 sx={{ height: '24px', width: '24px', borderRadius: '16px' }}
                 alt='avatar'
-                src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
+                src={post.author?.avatar?.url || ''}
               />
               <Link
                 sx={{ color: 'inherit' }}
@@ -423,7 +423,7 @@ function FullComment({ comment }: IFullCommentProps) {
             <Avatar
               sx={{ height: '24px', width: '24px', borderRadius: '16px' }}
               alt='avatar'
-              src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
+              src={comment.author?.avatar?.url || ''}
             />
             <Link
               sx={{ color: 'inherit' }}
