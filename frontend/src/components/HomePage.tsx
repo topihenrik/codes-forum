@@ -59,7 +59,7 @@ function PostCard({ post }: PostCardProps) {
               <Avatar
                 sx={{ height: '32px', width: '32px', borderRadius: '16px' }}
                 alt='avatar'
-                src='https://res.cloudinary.com/dqcnxy51g/image/upload/v1665038713/blog-api/y3cc4mknjxyhqa3pgggz.webp'
+                src={post.author?.avatar?.url || ''}
               />
               <Link
                 sx={{ color: 'inherit' }}
@@ -86,9 +86,9 @@ function PostCard({ post }: PostCardProps) {
             <Typography>{post.title}</Typography>
           </Link>
           <Box sx={{ display: 'flex', gap: '8px' }}>
-            <Chip label='C++' />
-            <Chip label='NoSQL' />
-            <Chip label='OOP' />
+            <Chip label='Tag 1' />
+            <Chip label='Tag 2' />
+            <Chip label='Tag 3' />
           </Box>
         </Box>
       </Box>

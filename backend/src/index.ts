@@ -5,6 +5,7 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import morgan from 'morgan';
+import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
 
 import { makeExecutableSchema } from '@graphql-tools/schema';
 // eslint-disable-next-line import/extensions
@@ -42,6 +43,7 @@ await server.start();
 
 app.use(morgan('dev'));
 app.use(cors());
+app.use(graphqlUploadExpress({ maxFileSize: 2097152, maxFiles: 1 }));
 app.use(express.json());
 
 if (process.env.NODE_ENV === 'production') app.use(express.static('front'));
