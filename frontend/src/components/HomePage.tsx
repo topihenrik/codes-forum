@@ -13,7 +13,7 @@ import '@fontsource/roboto-condensed';
 import bgBlurSvg from '../assets/bg-blur-v2.svg';
 import { VOTE_POST } from '../graphql/mutations';
 import Voting from './Voting';
-import { feedPostsPageVar } from '../cache';
+import { feedPostsPageVar } from '../config/cache';
 
 interface PostCardProps {
   post: Post
@@ -67,7 +67,9 @@ function PostCard({ post }: PostCardProps) {
                   component={RouterLink}
                   to={`/profile/${post.author?._id}`}
                 >
-                  <Typography>
+                  <Typography
+                    sx={{ wordBreak: 'break-word' }}
+                  >
                     @
                     {post.author?.username}
                   </Typography>
@@ -84,7 +86,10 @@ function PostCard({ post }: PostCardProps) {
               component={RouterLink}
               to={`/post/${post._id}`}
             >
-              <Typography variant='h6'>
+              <Typography
+                variant='h6'
+                sx={{ wordBreak: 'break-word' }}
+              >
                 {post.title}
               </Typography>
             </Link>
@@ -105,7 +110,7 @@ function PostCard({ post }: PostCardProps) {
 
 function PostsList() {
   const feedPostsPage = useReactiveVar(feedPostsPageVar);
-  const limit = 5;
+  const limit = 10; // =  how many posts in one page
   const [offset, setOffset] = useState((feedPostsPage - 1) * limit);
   const resultFeedPosts = useQuery(GET_FEED_POSTS, {
     variables: {
@@ -128,7 +133,7 @@ function PostsList() {
     }
   };
 
-  if (resultFeedPosts.error) {
+  if (resultFeedPosts.error || !(resultFeedPosts?.data?.feedPosts)) {
     return (
       <Box>
         <Typography>
@@ -200,11 +205,14 @@ function PostsList() {
     );
   }
 
-  if ((!(resultFeedPosts?.data?.feedPosts))) {
+  if (resultFeedPosts.data.feedPosts.length === 0) {
     return (
-      <Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography>
-          No posts
+          No posts seeking for assistance. 😢
+        </Typography>
+        <Typography>
+          Be the first to ask!
         </Typography>
       </Box>
     );

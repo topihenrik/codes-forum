@@ -10,7 +10,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import InputIcon from '@mui/icons-material/Input';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useApolloClient, useReactiveVar } from '@apollo/client';
-import { decodedTokenVar } from '../cache';
+import { decodedTokenVar } from '../config/cache';
 
 function Header() {
   const [drawer, setDrawer] = useState(false);

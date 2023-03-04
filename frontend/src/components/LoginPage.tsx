@@ -5,7 +5,7 @@ import { useMutation, useApolloClient } from '@apollo/client';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LOGIN_USER } from '../graphql/mutations';
-import { decodedTokenVar } from '../cache';
+import { decodedTokenVar } from '../config/cache';
 import Notification from './Notification';
 import { decodeToken } from '../utils';
 
@@ -28,12 +28,14 @@ function LoginPage() {
     return () => { clearTimeout(timeid); };
   }, [notification]);
 
+  // Login failed -> Inform user about issues
   useEffect(() => {
     if (result.error) {
       setNotification({ message: result.error.message, type: 'error' });
     }
   }, [result.error]);
 
+  // Login success -> Set token and navigate to front page
   useEffect(() => {
     if (result?.data?.login) {
       const token = result.data.login.value;

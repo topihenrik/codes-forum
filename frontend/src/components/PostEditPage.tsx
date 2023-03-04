@@ -13,7 +13,7 @@ import ContentLoader from 'react-content-loader';
 import {
   ServerError, useMutation, useQuery, useReactiveVar,
 } from '@apollo/client';
-import { errorVar, decodedTokenVar } from '../cache';
+import { decodedTokenVar } from '../config/cache';
 import DraftEditor from './DraftEditor';
 import { EDIT_POST } from '../graphql/mutations';
 import { GET_POST } from '../graphql/queries';
@@ -80,13 +80,11 @@ function PostEditPage() {
       // Loading is complete
       if (!(oldPostResult?.data?.post?.author)) {
         // Post was not found -> Post 404
-        errorVar('Post not found');
-        navigate('/error', { replace: true });
+        navigate('/error/Post not found', { replace: true });
         // return;
       } else if (oldPostResult.data.post.author._id !== decodedToken?._id) {
         // Post author doesn't match the current user -> Unauthorized
-        errorVar('Unauthorized');
-        navigate('/error', { replace: true });
+        navigate('/error/Unauthorized', { replace: true });
       }
     }
   }, [oldPostResult, navigate, decodedToken]);
@@ -104,14 +102,14 @@ function PostEditPage() {
     }
   }, [oldPostResult.data, setEditorState]);
 
-  // After succesful post edit -> Navigate back to post site
+  // Post update successful -> Navigate to the post site
   useEffect(() => {
     if (editResult.data) {
       navigate(`/post/${postid}`);
     }
   }, [editResult.data, postid, navigate]);
 
-  // If post update fails in the backend -> Inform the user about issues
+  // Post update failed -> Inform the user about issues
   useEffect(() => {
     if (editResult.error) {
       if (editResult.error.networkError) { // parse network error message
@@ -262,10 +260,13 @@ function PostEditPage() {
                 <Button
                   variant='contained'
                   onClick={handlePostSubmit}
+                  disabled={editResult.loading}
                 >
                   Update
                 </Button>
-                <Typography>
+                <Typography
+                  sx={{ wordBreak: 'break-word' }}
+                >
                   author: @
                   {decodedToken && decodedToken.username}
                 </Typography>

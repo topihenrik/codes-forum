@@ -15,7 +15,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { GET_COMMENT, GET_COMMENTS, GET_POST } from '../graphql/queries';
 import { Vote, type Comment } from '../__generated__/graphql';
-import { errorVar, decodedTokenVar } from '../cache';
+import { decodedTokenVar } from '../config/cache';
 import DraftEditor from './DraftEditor';
 import {
   CREATE_COMMENT, EDIT_COMMENT, VOTE_COMMENT, VOTE_POST,
@@ -36,8 +36,7 @@ function FullPost() {
 
   // Loading is complete and a post was not found -> Post 404
   if (!result.loading && (!(result?.data?.post))) {
-    errorVar('Post not found');
-    navigate('/error', { replace: true });
+    navigate('/error/Post not found', { replace: true });
   }
 
   if (result.error || (!(result?.data?.post))) {
@@ -97,7 +96,12 @@ function FullPost() {
         backgroundColor: 'primary.dark', borderBottomLeftRadius: '0', borderBottomRightRadius: '0', padding: { xs: '8px', sm: '16px' }, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '8px',
       }}
       >
-        <Typography variant='h4'>{post.title}</Typography>
+        <Typography
+          sx={{ wordBreak: 'break-word' }}
+          variant='h4'
+        >
+          {post.title}
+        </Typography>
       </Paper>
       <Box sx={{
         display: 'flex', gap: { xs: '4px', sm: '8px' }, padding: { xs: '8px', sm: '16px' }, boxSizing: 'border-box',
@@ -118,6 +122,7 @@ function FullPost() {
         }}
         >
           <Box
+            sx={{ wordBreak: 'break-word' }}
             dangerouslySetInnerHTML={{ __html: cleanBody }}
           />
           <Box sx={{ display: 'flex', gap: '8px' }}>
@@ -186,7 +191,7 @@ function FullPost() {
                 component={RouterLink}
                 to={`/profile/${post.author?._id}`}
               >
-                <Typography sx={{ fontSize: '0.9rem' }}>
+                <Typography sx={{ fontSize: '0.9rem', wordBreak: 'break-word' }}>
                   @
                   {post.author?.username}
                 </Typography>
@@ -213,14 +218,7 @@ function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
   const postid = useParams().id || '';
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const decodedToken = useReactiveVar(decodedTokenVar);
-  // const [error, setError] = useState<IError | null >(null);
   const [notification, setNotification] = useState<INotification | null>(null);
-
-  // Handle notification change
-  useEffect(() => {
-    const timeid = setTimeout(() => { setNotification(null); }, 5000);
-    return () => { clearTimeout(timeid); };
-  }, [notification]);
 
   const oldCommentResult = useQuery(GET_COMMENT, {
     variables: {
@@ -236,6 +234,12 @@ function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
       ],
     },
   );
+
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
 
   // After fetching data from the backend -> Set Editor content state.
   useEffect(() => {
@@ -319,6 +323,7 @@ function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
           <Button
             variant='contained'
             onClick={handleCommentSubmit}
+            disabled={editResult.loading}
           >
             Update
           </Button>
@@ -392,6 +397,7 @@ function FullComment({ comment }: IFullCommentProps) {
       }}
       >
         <Box
+          sx={{ wordBreak: 'break-word' }}
           className='comment'
           dangerouslySetInnerHTML={{ __html: cleanBody }}
         />
@@ -452,7 +458,7 @@ function FullComment({ comment }: IFullCommentProps) {
               component={RouterLink}
               to={`/profile/${comment.author?._id}`}
             >
-              <Typography sx={{ fontSize: '0.9rem' }}>
+              <Typography sx={{ fontSize: '0.9rem', wordBreak: 'break-word' }}>
                 @
                 {comment.author?.username}
               </Typography>
@@ -470,7 +476,7 @@ function CommentsList() {
     variables: { post: postid },
   });
 
-  if (result.error) {
+  if (result.error || !(result?.data?.comments)) {
     return (
       <Box>
         <Typography>
@@ -518,7 +524,7 @@ function CommentsList() {
     );
   }
 
-  if (!(result?.data?.comments) || result.data.comments.length === 0) {
+  if (result.data.comments.length === 0) {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography>
@@ -655,6 +661,7 @@ function CommentCreate() {
         <Button
           variant='contained'
           onClick={handleCommentSubmit}
+          disabled={result.loading}
         >
           Submit
         </Button>

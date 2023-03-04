@@ -23,17 +23,13 @@ function SignupPage() {
   const [avatar, setAvatar] = useState<File | undefined>(undefined);
   const [notification, setNotification] = useState<INotification | null>(null);
 
-  if (result.data) {
-    navigate('/login');
-  }
-
   // Handle notification change
   useEffect(() => {
     const timeid = setTimeout(() => { setNotification(null); }, 5000);
     return () => { clearTimeout(timeid); };
   }, [notification]);
 
-  // Failed signup -> Inform user about issues
+  // Signup failed -> Inform user about issues
   useEffect(() => {
     if (result.error) {
       if (result.error.networkError) { // parse network error message
@@ -44,6 +40,13 @@ function SignupPage() {
       }
     }
   }, [result.error]);
+
+  // Signup success -> Navigate to login page
+  useEffect(() => {
+    if (result.data?.createUser) {
+      navigate('/login');
+    }
+  }, [result.data, navigate]);
 
   const handleFileChange = (event: React.ChangeEvent) => {
     const inputFileElement = event.target as HTMLInputElement;

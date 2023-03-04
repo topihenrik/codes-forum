@@ -1,16 +1,15 @@
-import { useReactiveVar } from '@apollo/client';
 import { Box, Container, Typography } from '@mui/material';
-import { errorVar } from '../cache';
+import { useParams } from 'react-router-dom';
 
 function ErrorPage() {
-  const error = useReactiveVar(errorVar);
+  const { message } = useParams();
   return (
     <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box>
         <Typography variant='h4'>
           Error:
           {' '}
-          {error}
+          {message}
         </Typography>
       </Box>
     </Container>

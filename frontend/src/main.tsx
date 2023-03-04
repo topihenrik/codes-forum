@@ -2,9 +2,9 @@ import ReactDOM from 'react-dom/client';
 import { ApolloClient, ApolloProvider } from '@apollo/client';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material';
-import cache from './cache';
-import link from './link';
-import theme from './theme';
+import cache from './config/cache';
+import link from './config/link';
+import theme from './config/theme';
 import './index.css';
 import HomePage from './components/HomePage';
 import SignupPage from './components/SignupPage';
@@ -19,11 +19,7 @@ import PostPage from './components/PostPage';
 import PostEditPage from './components/PostEditPage';
 import ErrorPage from './components/ErrorPage';
 
-const client = new ApolloClient(
-  {
-    cache, link,
-  },
-);
+const client = new ApolloClient({ cache, link });
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <ApolloProvider client={client}>
@@ -76,7 +72,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
             element={<PostPage />}
           />
           <Route
-            path='/error'
+            path='/error/:message'
             element={<ErrorPage />}
           />
         </Routes>

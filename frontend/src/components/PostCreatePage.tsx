@@ -10,7 +10,7 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { ServerError, useMutation, useReactiveVar } from '@apollo/client';
-import { decodedTokenVar } from '../cache';
+import { decodedTokenVar } from '../config/cache';
 import DraftEditor from './DraftEditor';
 import { CREATE_POST } from '../graphql/mutations';
 import { GET_FEED_POSTS, GET_POSTS_COUNT } from '../graphql/queries';
@@ -66,14 +66,14 @@ function PostCreatePage() {
     return () => { clearTimeout(timeid); };
   }, [notification]);
 
-  // After succesful post creation -> Navigate to the post site
+  // Post creation successful -> Navigate to the post site
   useEffect(() => {
     if (result.data?.createPost) {
       navigate(`/post/${result.data.createPost._id}`);
     }
   }, [result.data, navigate]);
 
-  // If post creation fails in the backend -> Inform the user about issues
+  // Post creation failed -> Inform the user about issues
   useEffect(() => {
     if (result.error) {
       if (result.error.networkError) { // parse network error message
@@ -189,10 +189,13 @@ function PostCreatePage() {
                 <Button
                   variant='contained'
                   onClick={handlePostSubmit}
+                  disabled={result.loading}
                 >
                   Submit
                 </Button>
-                <Typography>
+                <Typography
+                  sx={{ wordBreak: 'break-word' }}
+                >
                   author: @
                   {decodedToken && decodedToken.username}
                 </Typography>
