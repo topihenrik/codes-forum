@@ -32,6 +32,12 @@ function BasicInfoForm({ data, loading }: BasicInfoFormProps) {
   const [bio, setBio] = useState('');
   const [notification, setNotification] = useState<INotification | null>(null);
 
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
+
   // Set old datas to text fields
   useEffect(() => {
     setUsername(data?.account?.username || '');
@@ -196,6 +202,12 @@ function PasswordInfoForm({ loading }: PasswordInfoFormProps) {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [notification, setNotification] = useState<INotification | null>(null);
+
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
 
   // Succesful password update -> Inform user
   useEffect(() => {

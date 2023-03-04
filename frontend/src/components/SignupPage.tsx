@@ -9,8 +9,9 @@ import Paper from '@mui/material/Paper';
 import { CREATE_USER } from '../graphql/mutations';
 import Notification from './Notification';
 
-interface IError {
-  message: string
+interface INotification {
+  message: string,
+  type: 'success' | 'error'
 }
 
 function SignupPage() {
@@ -20,19 +21,26 @@ function SignupPage() {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [avatar, setAvatar] = useState<File | undefined>(undefined);
-  const [error, setError] = useState<IError | null >(null);
+  const [notification, setNotification] = useState<INotification | null>(null);
 
   if (result.data) {
     navigate('/login');
   }
 
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
+
+  // Failed signup -> Inform user about issues
   useEffect(() => {
     if (result.error) {
       if (result.error.networkError) { // parse network error message
         const netError = result.error.networkError as ServerError;
-        setError({ message: netError.result.errors[0].message });
+        setNotification({ message: netError.result.errors[0].message, type: 'error' });
       } else { // parse graphql error message
-        setError({ message: result.error.message });
+        setNotification({ message: result.error.message, type: 'error' });
       }
     }
   }, [result.error]);
@@ -112,10 +120,10 @@ function SignupPage() {
               onChange={handleFileChange}
             />
           </Button>
-          {error && (
+          {notification && (
             <Notification
-              message={error.message}
-              type='error'
+              message={notification.message}
+              type={notification.type}
             />
           )}
           <Button

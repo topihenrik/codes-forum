@@ -9,22 +9,30 @@ import { decodedTokenVar } from '../cache';
 import Notification from './Notification';
 import { decodeToken } from '../utils';
 
+interface INotification {
+  message: string,
+  type: 'success' | 'error'
+}
+
 function LoginPage() {
   const [login, result] = useMutation(LOGIN_USER);
   const navigate = useNavigate();
   const client = useApolloClient();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [notification, setNotification] = useState<INotification | null>(null);
 
-  const handleLoginSubmit = async (event: React.FormEvent) => {
-    try {
-      event.preventDefault();
-      await login({ variables: { username, password } });
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
+
+  useEffect(() => {
+    if (result.error) {
+      setNotification({ message: result.error.message, type: 'error' });
     }
-  };
+  }, [result.error]);
 
   useEffect(() => {
     if (result?.data?.login) {
@@ -35,6 +43,16 @@ function LoginPage() {
       navigate('/');
     }
   }, [result.data, client, navigate]);
+
+  const handleLoginSubmit = async (event: React.FormEvent) => {
+    try {
+      event.preventDefault();
+      await login({ variables: { username, password } });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  };
 
   return (
     <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -65,10 +83,10 @@ function LoginPage() {
             value={password}
             onChange={(event) => { setPassword(event.target.value); }}
           />
-          {result.error && (
+          {notification && (
             <Notification
-              message={result.error.message}
-              type='error'
+              message={notification.message}
+              type={notification.type}
             />
           )}
           <Button

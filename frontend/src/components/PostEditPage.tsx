@@ -40,8 +40,9 @@ const TitleTextField = styled(TextField)({
   },
 });
 
-interface IError {
-  message: string
+interface INotification {
+  message: string,
+  type: 'success' | 'error'
 }
 
 function PostEditPage() {
@@ -49,7 +50,7 @@ function PostEditPage() {
   const [tags, setTags] = useState<string[]>([]);
   const navigate = useNavigate();
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
-  const [error, setError] = useState<IError | null >(null);
+  const [notification, setNotification] = useState<INotification | null>(null);
   const decodedToken = useReactiveVar(decodedTokenVar);
   const postid = useParams().id || '';
 
@@ -58,19 +59,21 @@ function PostEditPage() {
       _id: postid,
     },
   });
+
   const [editPost, editResult] = useMutation(
     EDIT_POST,
-    /* {
-      refetchQueries: [{ query: GET_POSTS }, { query: GET_POST, variables: { _id: postid } }],
-    }, */
     {
       refetchQueries: [
         { query: GET_POST, variables: { _id: postid } },
-        /* { query: GET_FEED_POSTS, variables: { offset: 0, limit: 10 } },
-        { query: GET_POSTS_COUNT }, */
       ],
     },
   );
+
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
 
   useEffect(() => {
     if (!oldPostResult.loading) {
@@ -113,12 +116,16 @@ function PostEditPage() {
     if (editResult.error) {
       if (editResult.error.networkError) { // parse network error message
         const netError = editResult.error.networkError as ServerError;
-        setError({ message: netError.result.errors[0].message });
+        setNotification({ message: netError.result.errors[0].message, type: 'error' });
       } else { // parse graphql error message
-        setError({ message: editResult.error.message });
+        setNotification({ message: editResult.error.message, type: 'error' });
       }
     }
   }, [editResult.error]);
+
+  const handleEditorChange = (newEditorState: EditorState) => {
+    setEditorState(newEditorState);
+  };
 
   const handleTagsOnChange = (newTags: string[]) => {
     setTags(newTags);
@@ -129,19 +136,15 @@ function PostEditPage() {
     return false;
   };
 
-  const handleEditorChange = (newEditorState: EditorState) => {
-    setEditorState(newEditorState);
-  };
-
   const handlePostSubmit = async () => {
     try {
       if (title.length <= 5) {
-        setError({ message: 'Title too short. Minimum length: 5' });
+        setNotification({ message: 'Title too short. Minimum length: 5', type: 'error' });
         return;
       }
 
       if (editorState.getCurrentContent().getPlainText().length <= 50) {
-        setError({ message: 'Post too short. Minimum length: 50' });
+        setNotification({ message: 'Post too short. Minimum length: 50', type: 'error' });
         return;
       }
 
@@ -230,38 +233,43 @@ function PostEditPage() {
               onEditorStateChange={handleEditorChange}
             />
           </Box>
-          {error && (
-            <Notification
-              message={error.message}
-              type='error'
-            />
-          )}
           <Box sx={{
-            display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px 0 0 0',
+            display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '16px',
           }}
           >
-            <Box sx={{ width: 'fit-content' }}>
-              <TagsInput
-                value={tags}
-                onChange={handleTagsOnChange}
-                beforeAddValidate={beforeAddTagsValidate}
-                placeHolder='Tags (max: 3)'
+            {notification && (
+              <Notification
+                message={notification.message}
+                type='error'
               />
-            </Box>
+            )}
             <Box sx={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
+              display: 'flex', flexDirection: 'column', gap: '16px',
             }}
             >
-              <Button
-                variant='contained'
-                onClick={handlePostSubmit}
+              <Box sx={{ width: 'fit-content' }}>
+                <TagsInput
+                  value={tags}
+                  onChange={handleTagsOnChange}
+                  beforeAddValidate={beforeAddTagsValidate}
+                  placeHolder='Tags (max: 3)'
+                />
+              </Box>
+              <Box sx={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
+              }}
               >
-                Update
-              </Button>
-              <Typography>
-                author: @
-                {decodedToken && decodedToken.username}
-              </Typography>
+                <Button
+                  variant='contained'
+                  onClick={handlePostSubmit}
+                >
+                  Update
+                </Button>
+                <Typography>
+                  author: @
+                  {decodedToken && decodedToken.username}
+                </Typography>
+              </Box>
             </Box>
           </Box>
         </Paper>

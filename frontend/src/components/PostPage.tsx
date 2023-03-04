@@ -199,6 +199,11 @@ function FullPost() {
   );
 }
 
+interface INotification {
+  message: string,
+  type: 'success' | 'error'
+}
+
 interface ICommentEditProps {
   commentId: string
   setEditing: React.Dispatch<React.SetStateAction<boolean>>
@@ -206,11 +211,23 @@ interface ICommentEditProps {
 
 function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
   const postid = useParams().id || '';
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const decodedToken = useReactiveVar(decodedTokenVar);
+  // const [error, setError] = useState<IError | null >(null);
+  const [notification, setNotification] = useState<INotification | null>(null);
+
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
+
   const oldCommentResult = useQuery(GET_COMMENT, {
     variables: {
       _id: commentId,
     },
   });
+
   const [editComment, editResult] = useMutation(
     EDIT_COMMENT,
     {
@@ -219,9 +236,6 @@ function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
       ],
     },
   );
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
-  const decodedToken = useReactiveVar(decodedTokenVar);
-  const [error, setError] = useState<IError | null >(null);
 
   // After fetching data from the backend -> Set Editor content state.
   useEffect(() => {
@@ -238,14 +252,14 @@ function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
     }
   }, [editResult.data, setEditing]);
 
-  // If comment update fails in the backend -> Inform about issues to the user
+  // Failed comment update -> Inform user about issues
   useEffect(() => {
     if (editResult.error) {
       if (editResult.error.networkError) { // parse network error message
         const netError = editResult.error.networkError as ServerError;
-        setError({ message: netError.result.errors[0].message });
+        setNotification({ message: netError.result.errors[0].message, type: 'error' });
       } else { // parse graphql error message
-        setError({ message: editResult.error.message });
+        setNotification({ message: editResult.error.message, type: 'error' });
       }
     }
   }, [editResult.error]);
@@ -257,7 +271,7 @@ function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
   const handleCommentSubmit = async () => {
     try {
       if (editorState.getCurrentContent().getPlainText().length <= 10) {
-        setError({ message: 'Comment too short. Minimum length: 10' });
+        setNotification({ message: 'Comment too short. Minimum length: 10', type: 'error' });
         return;
       }
 
@@ -291,14 +305,14 @@ function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
         editorState={editorState}
         onEditorStateChange={handleEditorChange}
       />
-      {error && (
+      {notification && (
       <Notification
-        message={error.message}
-        type='error'
+        message={notification.message}
+        type={notification.type}
       />
       )}
       <Box sx={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '8px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
       }}
       >
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
@@ -531,10 +545,6 @@ function CommentsList() {
   );
 }
 
-interface IError {
-  message: string
-}
-
 function CommentCreate() {
   const postid = useParams().id || '';
   const [createComment, result] = useMutation(
@@ -547,22 +557,28 @@ function CommentCreate() {
   );
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const decodedToken = useReactiveVar(decodedTokenVar);
-  const [error, setError] = useState<IError | null >(null);
+  const [notification, setNotification] = useState<INotification | null>(null);
+
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
 
   // After succesful comment creation -> Empty Editor content and Error messages
   useEffect(() => {
     setEditorState(EditorState.createEmpty());
-    setError(null);
+    setNotification(null);
   }, [result.data]);
 
-  // If comment creation fails in the backend -> Inform about issues to the user
+  // Failed comment creation -> Inform user about issues
   useEffect(() => {
     if (result.error) {
       if (result.error.networkError) { // parse network error message
         const netError = result.error.networkError as ServerError;
-        setError({ message: netError.result.errors[0].message });
+        setNotification({ message: netError.result.errors[0].message, type: 'error' });
       } else { // parse graphql error message
-        setError({ message: result.error.message });
+        setNotification({ message: result.error.message, type: 'error' });
       }
     }
   }, [result.error]);
@@ -574,7 +590,7 @@ function CommentCreate() {
   const handleCommentSubmit = async () => {
     try {
       if (editorState.getCurrentContent().getPlainText().length <= 10) {
-        setError({ message: 'Comment too short. Minimum length: 10' });
+        setNotification({ message: 'Comment too short. Minimum length: 10', type: 'error' });
         return;
       }
 
@@ -626,14 +642,14 @@ function CommentCreate() {
         editorState={editorState}
         onEditorStateChange={handleEditorChange}
       />
-      {error && (
+      {notification && (
       <Notification
-        message={error.message}
-        type='error'
+        message={notification.message}
+        type={notification.type}
       />
       )}
       <Box sx={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '8px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
       }}
       >
         <Button
