@@ -10,7 +10,7 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { ServerError, useMutation, useReactiveVar } from '@apollo/client';
-import { decodedTokenVar } from '../cache';
+import { decodedTokenVar } from '../config/cache';
 import DraftEditor from './DraftEditor';
 import { CREATE_POST } from '../graphql/mutations';
 import { GET_FEED_POSTS, GET_POSTS_COUNT } from '../graphql/queries';
@@ -37,8 +37,9 @@ const TitleTextField = styled(TextField)({
   },
 });
 
-interface IError {
-  message: string
+interface INotification {
+  message: string,
+  type: 'success' | 'error'
 }
 
 function PostCreatePage() {
@@ -46,13 +47,11 @@ function PostCreatePage() {
   const [tags, setTags] = useState<string[]>([]);
   const navigate = useNavigate();
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
-  const [error, setError] = useState<IError | null >(null);
+  const [notification, setNotification] = useState<INotification | null>(null);
   const decodedToken = useReactiveVar(decodedTokenVar);
+
   const [createPost, result] = useMutation(
     CREATE_POST,
-    /* {
-      refetchQueries: [{ query: GET_POSTS }],
-    }, */
     {
       refetchQueries: [
         { query: GET_FEED_POSTS, variables: { offset: 0, limit: 10 } },
@@ -61,47 +60,40 @@ function PostCreatePage() {
     },
   );
 
-  const handleTagsOnChange = (newTags: string[]) => {
-    setTags(newTags);
-  };
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
 
-  const beforeAddTagsValidate = (newTag: string, existingTags: string[]) => {
-    if (newTag.length <= 16 && existingTags.length < 3) return true;
-    return false;
-  };
-
-  // After succesful post creation -> Navigate to the post site
+  // Post creation successful -> Navigate to the post site
   useEffect(() => {
     if (result.data?.createPost) {
       navigate(`/post/${result.data.createPost._id}`);
     }
   }, [result.data, navigate]);
 
-  // If post creation fails in the backend -> Inform the user about issues
+  // Post creation failed -> Inform the user about issues
   useEffect(() => {
     if (result.error) {
       if (result.error.networkError) { // parse network error message
         const netError = result.error.networkError as ServerError;
-        setError({ message: netError.result.errors[0].message });
+        setNotification({ message: netError.result.errors[0].message, type: 'error' });
       } else { // parse graphql error message
-        setError({ message: result.error.message });
+        setNotification({ message: result.error.message, type: 'error' });
       }
     }
   }, [result.error]);
 
-  const handleEditorChange = (newEditorState: EditorState) => {
-    setEditorState(newEditorState);
-  };
-
   const handlePostSubmit = async () => {
     try {
       if (title.length <= 5) {
-        setError({ message: 'Title too short. Minimum length: 5' });
+        setNotification({ message: 'Title too short. Minimum length: 5', type: 'error' });
         return;
       }
 
       if (editorState.getCurrentContent().getPlainText().length <= 50) {
-        setError({ message: 'Post too short. Minimum length: 50' });
+        setNotification({ message: 'Post too short. Minimum length: 50', type: 'error' });
         return;
       }
 
@@ -118,6 +110,19 @@ function PostCreatePage() {
       // eslint-disable-next-line no-console
       console.error(err);
     }
+  };
+
+  const handleEditorChange = (newEditorState: EditorState) => {
+    setEditorState(newEditorState);
+  };
+
+  const handleTagsOnChange = (newTags: string[]) => {
+    setTags(newTags);
+  };
+
+  const beforeAddTagsValidate = (newTag: string, existingTags: string[]) => {
+    if (newTag.length <= 16 && existingTags.length < 3) return true;
+    return false;
   };
 
   return (
@@ -155,38 +160,46 @@ function PostCreatePage() {
               onEditorStateChange={handleEditorChange}
             />
           </Box>
-          {error && (
-            <Notification
-              message={error.message}
-              type='error'
-            />
-          )}
           <Box sx={{
-            display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px 0 0 0',
+            display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '16px',
           }}
           >
-            <Box sx={{ width: 'fit-content' }}>
-              <TagsInput
-                value={tags}
-                onChange={handleTagsOnChange}
-                beforeAddValidate={beforeAddTagsValidate}
-                placeHolder='Tags (max: 3)'
+            {notification && (
+              <Notification
+                message={notification.message}
+                type={notification.type}/* 'error' */
               />
-            </Box>
+            )}
             <Box sx={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
+              display: 'flex', flexDirection: 'column', gap: '16px',
             }}
             >
-              <Button
-                variant='contained'
-                onClick={handlePostSubmit}
+              <Box sx={{ width: 'fit-content' }}>
+                <TagsInput
+                  value={tags}
+                  onChange={handleTagsOnChange}
+                  beforeAddValidate={beforeAddTagsValidate}
+                  placeHolder='Tags (max: 3)'
+                />
+              </Box>
+              <Box sx={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
+              }}
               >
-                Submit
-              </Button>
-              <Typography>
-                author: @
-                {decodedToken && decodedToken.username}
-              </Typography>
+                <Button
+                  variant='contained'
+                  onClick={handlePostSubmit}
+                  disabled={result.loading}
+                >
+                  Submit
+                </Button>
+                <Typography
+                  sx={{ wordBreak: 'break-word' }}
+                >
+                  author: @
+                  {decodedToken && decodedToken.username}
+                </Typography>
+              </Box>
             </Box>
           </Box>
         </Paper>

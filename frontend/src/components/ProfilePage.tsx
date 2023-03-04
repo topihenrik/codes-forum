@@ -11,7 +11,6 @@ import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 import { useQuery } from '@apollo/client';
 import { GET_PROFILE } from '../graphql/queries';
 import { type Post, type Comment } from '../__generated__/graphql';
-import { errorVar } from '../cache';
 
 interface IPostRowProps {
   post: Post
@@ -22,7 +21,7 @@ function PostRow({ post }: IPostRowProps) {
     <TableRow>
       <TableCell>
         <Link
-          sx={{ color: 'inherit' }}
+          sx={{ color: 'inherit', wordBreak: 'break-word' }}
           component={RouterLink}
           to={`/post/${post._id}`}
         >
@@ -52,7 +51,7 @@ function CommentRow({ comment }: ICommentRowProps) {
     <TableRow>
       <TableCell>
         <Link
-          sx={{ color: 'inherit' }}
+          sx={{ color: 'inherit', wordBreak: 'break-word' }}
           component={RouterLink}
           to={`/post/${comment.post?._id}`}
         >
@@ -83,9 +82,7 @@ function ProfilePage() {
       // Loading is complete
       if (!(result?.data?.profile?.user)) {
         // User was not found -> Post 404
-        errorVar('User not found');
-        navigate('/error', { replace: true });
-        // return;
+        navigate('/error/User not found', { replace: true });
       }
     }
   }, [result, navigate]);
@@ -135,8 +132,6 @@ function ProfilePage() {
     );
   }
 
-  if (!(result.data?.profile)) return null;
-
   return (
     <Container sx={{
       display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 0',
@@ -167,20 +162,24 @@ function ProfilePage() {
                 <Avatar
                   sx={{ height: { xs: '80px', sm: '128px' }, width: { xs: '80px', sm: '128px' }, borderRadius: '8px' }}
                   alt='avatar'
-                  src={result.data.profile.user?.avatar?.url || ''}
+                  src={result?.data?.profile?.user?.avatar?.url || ''}
                 />
-                <Typography>
+                <Typography
+                  sx={{ wordBreak: 'break-word' }}
+                >
                   @
-                  {result.data.profile.user?.username}
+                  {result?.data?.profile?.user?.username}
                 </Typography>
               </Box>
-              <Typography>
+              <Typography
+                sx={{ wordBreak: 'break-word' }}
+              >
                 Bio:
                 {' '}
-                { ((!result.data.profile.user?.bio) || result.data.profile.user?.bio === '') ? (
+                { ((!result?.data?.profile?.user?.bio) || result.data.profile.user.bio === '') ? (
                   'Add a bio in the account page ✍️'
                 ) : (
-                  result.data.profile.user?.bio
+                  result.data.profile.user.bio
                 )}
               </Typography>
             </Box>
@@ -192,17 +191,17 @@ function ProfilePage() {
             <Typography>
               Posts:
               {' '}
-              {result.data.profile.postCount}
+              {result?.data?.profile?.postCount}
             </Typography>
             <Typography>
               Comments:
               {' '}
-              {result.data.profile.commentCount}
+              {result?.data?.profile?.commentCount}
             </Typography>
             <Typography>
               Account Age:
               {' '}
-              {Math.floor(-1 * DateTime.fromJSDate(new Date(result.data.profile.user?.createdAt)).diffNow('days').days)}
+              {Math.floor(-1 * DateTime.fromJSDate(new Date(result?.data?.profile?.user?.createdAt)).diffNow('days').days)}
               {' days'}
             </Typography>
           </Paper>
@@ -217,7 +216,7 @@ function ProfilePage() {
             </Typography>
           </Paper>
           <Box sx={{ padding: '16px' }}>
-            {result.data.profile.recentPosts?.length !== 0
+            {result?.data?.profile?.recentPosts?.length !== 0
               ? (
                 <Table>
                   <TableHead>
@@ -237,7 +236,7 @@ function ProfilePage() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {result.data.profile.recentPosts?.map(
+                    {result?.data?.profile?.recentPosts?.map(
                       (post) => (
                         <PostRow
                           key={post?._id}
@@ -266,7 +265,7 @@ function ProfilePage() {
             </Typography>
           </Paper>
           <Box sx={{ padding: '16px' }}>
-            {result.data.profile.recentPosts?.length !== 0
+            {result?.data?.profile?.recentComments?.length !== 0
               ? (
                 <Table>
                   <TableHead>
@@ -283,7 +282,7 @@ function ProfilePage() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {result.data.profile.recentComments?.map(
+                    {result?.data?.profile?.recentComments?.map(
                       (comment) => (
                         <CommentRow
                           key={comment?._id}

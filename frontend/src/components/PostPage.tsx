@@ -15,7 +15,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { GET_COMMENT, GET_COMMENTS, GET_POST } from '../graphql/queries';
 import { Vote, type Comment } from '../__generated__/graphql';
-import { errorVar, decodedTokenVar } from '../cache';
+import { decodedTokenVar } from '../config/cache';
 import DraftEditor from './DraftEditor';
 import {
   CREATE_COMMENT, EDIT_COMMENT, VOTE_COMMENT, VOTE_POST,
@@ -36,8 +36,7 @@ function FullPost() {
 
   // Loading is complete and a post was not found -> Post 404
   if (!result.loading && (!(result?.data?.post))) {
-    errorVar('Post not found');
-    navigate('/error', { replace: true });
+    navigate('/error/Post not found', { replace: true });
   }
 
   if (result.error || (!(result?.data?.post))) {
@@ -97,7 +96,12 @@ function FullPost() {
         backgroundColor: 'primary.dark', borderBottomLeftRadius: '0', borderBottomRightRadius: '0', padding: { xs: '8px', sm: '16px' }, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '8px',
       }}
       >
-        <Typography variant='h4'>{post.title}</Typography>
+        <Typography
+          sx={{ wordBreak: 'break-word' }}
+          variant='h4'
+        >
+          {post.title}
+        </Typography>
       </Paper>
       <Box sx={{
         display: 'flex', gap: { xs: '4px', sm: '8px' }, padding: { xs: '8px', sm: '16px' }, boxSizing: 'border-box',
@@ -118,6 +122,7 @@ function FullPost() {
         }}
         >
           <Box
+            sx={{ wordBreak: 'break-word' }}
             dangerouslySetInnerHTML={{ __html: cleanBody }}
           />
           <Box sx={{ display: 'flex', gap: '8px' }}>
@@ -186,7 +191,7 @@ function FullPost() {
                 component={RouterLink}
                 to={`/profile/${post.author?._id}`}
               >
-                <Typography sx={{ fontSize: '0.9rem' }}>
+                <Typography sx={{ fontSize: '0.9rem', wordBreak: 'break-word' }}>
                   @
                   {post.author?.username}
                 </Typography>
@@ -199,6 +204,11 @@ function FullPost() {
   );
 }
 
+interface INotification {
+  message: string,
+  type: 'success' | 'error'
+}
+
 interface ICommentEditProps {
   commentId: string
   setEditing: React.Dispatch<React.SetStateAction<boolean>>
@@ -206,11 +216,16 @@ interface ICommentEditProps {
 
 function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
   const postid = useParams().id || '';
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const decodedToken = useReactiveVar(decodedTokenVar);
+  const [notification, setNotification] = useState<INotification | null>(null);
+
   const oldCommentResult = useQuery(GET_COMMENT, {
     variables: {
       _id: commentId,
     },
   });
+
   const [editComment, editResult] = useMutation(
     EDIT_COMMENT,
     {
@@ -219,9 +234,12 @@ function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
       ],
     },
   );
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
-  const decodedToken = useReactiveVar(decodedTokenVar);
-  const [error, setError] = useState<IError | null >(null);
+
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
 
   // After fetching data from the backend -> Set Editor content state.
   useEffect(() => {
@@ -238,14 +256,14 @@ function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
     }
   }, [editResult.data, setEditing]);
 
-  // If comment update fails in the backend -> Inform about issues to the user
+  // Failed comment update -> Inform user about issues
   useEffect(() => {
     if (editResult.error) {
       if (editResult.error.networkError) { // parse network error message
         const netError = editResult.error.networkError as ServerError;
-        setError({ message: netError.result.errors[0].message });
+        setNotification({ message: netError.result.errors[0].message, type: 'error' });
       } else { // parse graphql error message
-        setError({ message: editResult.error.message });
+        setNotification({ message: editResult.error.message, type: 'error' });
       }
     }
   }, [editResult.error]);
@@ -257,7 +275,7 @@ function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
   const handleCommentSubmit = async () => {
     try {
       if (editorState.getCurrentContent().getPlainText().length <= 10) {
-        setError({ message: 'Comment too short. Minimum length: 10' });
+        setNotification({ message: 'Comment too short. Minimum length: 10', type: 'error' });
         return;
       }
 
@@ -291,20 +309,21 @@ function CommentEdit({ commentId, setEditing }: ICommentEditProps) {
         editorState={editorState}
         onEditorStateChange={handleEditorChange}
       />
-      {error && (
+      {notification && (
       <Notification
-        message={error.message}
-        type='error'
+        message={notification.message}
+        type={notification.type}
       />
       )}
       <Box sx={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '8px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
       }}
       >
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
           <Button
             variant='contained'
             onClick={handleCommentSubmit}
+            disabled={editResult.loading}
           >
             Update
           </Button>
@@ -378,6 +397,7 @@ function FullComment({ comment }: IFullCommentProps) {
       }}
       >
         <Box
+          sx={{ wordBreak: 'break-word' }}
           className='comment'
           dangerouslySetInnerHTML={{ __html: cleanBody }}
         />
@@ -438,7 +458,7 @@ function FullComment({ comment }: IFullCommentProps) {
               component={RouterLink}
               to={`/profile/${comment.author?._id}`}
             >
-              <Typography sx={{ fontSize: '0.9rem' }}>
+              <Typography sx={{ fontSize: '0.9rem', wordBreak: 'break-word' }}>
                 @
                 {comment.author?.username}
               </Typography>
@@ -456,7 +476,7 @@ function CommentsList() {
     variables: { post: postid },
   });
 
-  if (result.error) {
+  if (result.error || !(result?.data?.comments)) {
     return (
       <Box>
         <Typography>
@@ -504,7 +524,7 @@ function CommentsList() {
     );
   }
 
-  if (!(result?.data?.comments) || result.data.comments.length === 0) {
+  if (result.data.comments.length === 0) {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography>
@@ -531,10 +551,6 @@ function CommentsList() {
   );
 }
 
-interface IError {
-  message: string
-}
-
 function CommentCreate() {
   const postid = useParams().id || '';
   const [createComment, result] = useMutation(
@@ -547,22 +563,28 @@ function CommentCreate() {
   );
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const decodedToken = useReactiveVar(decodedTokenVar);
-  const [error, setError] = useState<IError | null >(null);
+  const [notification, setNotification] = useState<INotification | null>(null);
+
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
 
   // After succesful comment creation -> Empty Editor content and Error messages
   useEffect(() => {
     setEditorState(EditorState.createEmpty());
-    setError(null);
+    setNotification(null);
   }, [result.data]);
 
-  // If comment creation fails in the backend -> Inform about issues to the user
+  // Failed comment creation -> Inform user about issues
   useEffect(() => {
     if (result.error) {
       if (result.error.networkError) { // parse network error message
         const netError = result.error.networkError as ServerError;
-        setError({ message: netError.result.errors[0].message });
+        setNotification({ message: netError.result.errors[0].message, type: 'error' });
       } else { // parse graphql error message
-        setError({ message: result.error.message });
+        setNotification({ message: result.error.message, type: 'error' });
       }
     }
   }, [result.error]);
@@ -574,7 +596,7 @@ function CommentCreate() {
   const handleCommentSubmit = async () => {
     try {
       if (editorState.getCurrentContent().getPlainText().length <= 10) {
-        setError({ message: 'Comment too short. Minimum length: 10' });
+        setNotification({ message: 'Comment too short. Minimum length: 10', type: 'error' });
         return;
       }
 
@@ -626,19 +648,20 @@ function CommentCreate() {
         editorState={editorState}
         onEditorStateChange={handleEditorChange}
       />
-      {error && (
+      {notification && (
       <Notification
-        message={error.message}
-        type='error'
+        message={notification.message}
+        type={notification.type}
       />
       )}
       <Box sx={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '8px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
       }}
       >
         <Button
           variant='contained'
           onClick={handleCommentSubmit}
+          disabled={result.loading}
         >
           Submit
         </Button>

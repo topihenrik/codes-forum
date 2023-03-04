@@ -5,9 +5,14 @@ import { useMutation, useApolloClient } from '@apollo/client';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LOGIN_USER } from '../graphql/mutations';
-import { decodedTokenVar } from '../cache';
+import { decodedTokenVar } from '../config/cache';
 import Notification from './Notification';
 import { decodeToken } from '../utils';
+
+interface INotification {
+  message: string,
+  type: 'success' | 'error'
+}
 
 function LoginPage() {
   const [login, result] = useMutation(LOGIN_USER);
@@ -15,6 +20,31 @@ function LoginPage() {
   const client = useApolloClient();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [notification, setNotification] = useState<INotification | null>(null);
+
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
+
+  // Login failed -> Inform user about issues
+  useEffect(() => {
+    if (result.error) {
+      setNotification({ message: result.error.message, type: 'error' });
+    }
+  }, [result.error]);
+
+  // Login success -> Set token and navigate to front page
+  useEffect(() => {
+    if (result?.data?.login) {
+      const token = result.data.login.value;
+      localStorage.setItem('auth_token', token);
+      decodedTokenVar(decodeToken(token));
+      client.resetStore();
+      navigate('/');
+    }
+  }, [result.data, client, navigate]);
 
   const handleLoginSubmit = async (event: React.FormEvent) => {
     try {
@@ -25,16 +55,6 @@ function LoginPage() {
       console.error(err);
     }
   };
-
-  useEffect(() => {
-    if (result?.data?.login) {
-      const token = result.data.login.value;
-      localStorage.setItem('auth_token', token);
-      decodedTokenVar(decodeToken(token));
-      client.resetStore();
-      navigate('/');
-    }
-  }, [result.data, client, navigate]);
 
   return (
     <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -65,10 +85,10 @@ function LoginPage() {
             value={password}
             onChange={(event) => { setPassword(event.target.value); }}
           />
-          {result.error && (
+          {notification && (
             <Notification
-              message={result.error.message}
-              type='error'
+              message={notification.message}
+              type={notification.type}
             />
           )}
           <Button

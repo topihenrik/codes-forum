@@ -4,7 +4,7 @@ import {
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import { useReactiveVar } from '@apollo/client';
 import { Vote } from '../__generated__/graphql';
-import { decodedTokenVar } from '../cache';
+import { decodedTokenVar } from '../config/cache';
 
 interface VotingProps {
   voteCount: number,

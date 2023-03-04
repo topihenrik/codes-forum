@@ -8,7 +8,7 @@ import FileUploadIcon from '@mui/icons-material/FileUpload';
 import {
   ServerError, useMutation, useQuery, useReactiveVar,
 } from '@apollo/client';
-import { decodedTokenVar } from '../cache';
+import { decodedTokenVar } from '../config/cache';
 import { GET_ACCOUNT } from '../graphql/queries';
 import { AccountQuery } from '../__generated__/graphql';
 import { EDIT_BASIC_USER, EDIT_PASSWORD_USER } from '../graphql/mutations';
@@ -32,13 +32,19 @@ function BasicInfoForm({ data, loading }: BasicInfoFormProps) {
   const [bio, setBio] = useState('');
   const [notification, setNotification] = useState<INotification | null>(null);
 
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
+
   // Set old datas to text fields
   useEffect(() => {
     setUsername(data?.account?.username || '');
     setBio(data?.account?.bio || '');
   }, [data?.account]);
 
-  // Succesful information update -> Inform user
+  // Successful information update -> Inform user
   useEffect(() => {
     if (result.data?.editBasicUser) {
       setNotification({ message: 'Information updated', type: 'success' });
@@ -175,6 +181,7 @@ function BasicInfoForm({ data, loading }: BasicInfoFormProps) {
               id='btn-update-basic'
               variant='contained'
               onClick={handleEditBasicSubmit}
+              disabled={result.loading}
             >
               Update Information
             </Button>
@@ -196,6 +203,12 @@ function PasswordInfoForm({ loading }: PasswordInfoFormProps) {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [notification, setNotification] = useState<INotification | null>(null);
+
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
 
   // Succesful password update -> Inform user
   useEffect(() => {
@@ -316,6 +329,7 @@ function PasswordInfoForm({ loading }: PasswordInfoFormProps) {
               id='btn-update-password'
               variant='contained'
               onClick={handleEditPasswordSubmit}
+              disabled={result.loading}
             >
               Update Password
             </Button>
@@ -391,7 +405,9 @@ function AccountPage() {
                     component={RouterLink}
                     to={`/profile/${result.data?.account?._id}`}
                   >
-                    <Typography>
+                    <Typography
+                      sx={{ wordBreak: 'break-word' }}
+                    >
                       @
                       {result.data?.account?.username}
                     </Typography>

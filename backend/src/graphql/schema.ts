@@ -71,22 +71,22 @@ const typeDefs = gql`
 
     type Mutation {
         createUser(
-            username: String! @constraint(minLength: 3, maxLength: 255)
+            username: String! @constraint(minLength: 3, maxLength: 32)
             password: String! @constraint(minLength: 3, maxLength: 255)
             password_confirm: String! @constraint(minLength: 3, maxLength: 255)
             avatar: Upload
         ): User
         editBasicUser(
             _id: String!
-            username: String!
+            username: String! @constraint(minLength: 3, maxLength: 32)
             bio: String!
             avatar: Upload
         ): User
         editPasswordUser(
             _id: String!
-            old_password: String!
-            password: String!
-            password_confirm: String!
+            old_password: String! @constraint(minLength: 3, maxLength: 255)
+            password: String! @constraint(minLength: 3, maxLength: 255)
+            password_confirm: String! @constraint(minLength: 3, maxLength: 255)
         ): User
         login(
             username: String!

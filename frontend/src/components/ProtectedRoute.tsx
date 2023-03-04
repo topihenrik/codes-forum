@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useReactiveVar } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
-import { decodedTokenVar } from '../cache';
+import { decodedTokenVar } from '../config/cache';
 
 interface Props {
   children: JSX.Element
