@@ -39,16 +39,6 @@ function FullPost() {
     navigate('/error/Post not found', { replace: true });
   }
 
-  if (result.error || (!(result?.data?.post))) {
-    return (
-      <Box>
-        <Typography>
-          Errors
-        </Typography>
-      </Box>
-    );
-  }
-
   if (result.loading) {
     return (
       <ContentLoader
@@ -73,6 +63,16 @@ function FullPost() {
           height='368'
         />
       </ContentLoader>
+    );
+  }
+
+  if (result.error || (!(result?.data?.post))) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Typography>
+          Errors
+        </Typography>
+      </Box>
     );
   }
 
@@ -476,16 +476,6 @@ function CommentsList() {
     variables: { post: postid },
   });
 
-  if (result.error || !(result?.data?.comments)) {
-    return (
-      <Box>
-        <Typography>
-          Errors
-        </Typography>
-      </Box>
-    );
-  }
-
   if (result.loading) {
     return (
       <Box>
@@ -520,6 +510,16 @@ function CommentsList() {
             height='160'
           />
         </ContentLoader>
+      </Box>
+    );
+  }
+
+  if (result.error || !(result?.data?.comments)) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Typography>
+          Errors
+        </Typography>
       </Box>
     );
   }
