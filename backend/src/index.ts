@@ -46,15 +46,21 @@ app.use(cors());
 app.use(graphqlUploadExpress({ maxFileSize: 2097152, maxFiles: 1 }));
 app.use(express.json());
 
-if (process.env.NODE_ENV === 'production') app.use(express.static('front'));
-if (process.env.NODE_ENV === 'test') app.use('/api/test/db', testdbRoute);
-
 app.use(
   '/graphql',
   expressMiddleware(server, {
     context,
   }),
 );
+
+if (process.env.NODE_ENV === 'test') app.use('/api/test/db', testdbRoute);
+if (process.env.NODE_ENV === 'production') app.use(express.static('front'));
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    const theurl = new URL('../front/index.html', import.meta.url).pathname;
+    res.sendFile(theurl);
+  });
+}
 
 const PORT = 4000;
 // eslint-disable-next-line no-promise-executor-return

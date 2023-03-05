@@ -133,16 +133,6 @@ function PostsList() {
     }
   };
 
-  if (resultFeedPosts.error || !(resultFeedPosts?.data?.feedPosts)) {
-    return (
-      <Box>
-        <Typography>
-          Errors
-        </Typography>
-      </Box>
-    );
-  }
-
   if (resultFeedPosts.loading) {
     return (
       <Box>
@@ -201,6 +191,16 @@ function PostsList() {
             height='32'
           />
         </ContentLoader>
+      </Box>
+    );
+  }
+
+  if (resultFeedPosts.error || !(resultFeedPosts?.data?.feedPosts)) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Typography variant='h6'>
+          Errors
+        </Typography>
       </Box>
     );
   }
