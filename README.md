@@ -2,7 +2,6 @@
 Fullstack application made for the "Advanced Web Applications" course as a final project. The frontend and backend are both included in this monorepo. Apollo GraphQL, TypeScript, React.js, MongoDB and CI/CD are some of the concepts that were utilized in this project. The features of the application can be tested by the reviewer in the live version.
 
 ## Live preview
-❗Removal of content such as Users, Posts and Comments has not been implemented❗
 
 https://sparkling-glade-4102.fly.dev/
 
@@ -66,19 +65,22 @@ https://sparkling-glade-4102.fly.dev/
   * Title
   * Main content
   * Tags
-* Edit a post
+* Edit their post
   * Title
   * Main content
   * Tags
 * Like a post
+* Delete their post
 * Create a comment
-* Edit a comment
+* Edit their comment
 * Like a comment
+* Delete their comment
 * Edit their personal information
   * Username
   * Bio
   * Avatar
   * Password
+* Delete their account (including all their posts and comments)
     
 
 ## How many points should I obtain?
