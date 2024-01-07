@@ -3,6 +3,7 @@ import { DateTimeResolver, ObjectIDResolver } from 'graphql-scalars';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import cloudinary from 'cloudinary';
 import config from '../config.js';
 import {
   type Comment as CommentType, Resolvers, type Post as PostType,
@@ -12,7 +13,6 @@ import Post from '../models/post.js';
 import Comment from '../models/comment.js';
 import { IToken } from '../types';
 import { uploadImage, destroyImage } from '../cloudinary.js';
-import cloudinary from "cloudinary";
 
 const resolvers: Resolvers = {
   DateTime: DateTimeResolver,

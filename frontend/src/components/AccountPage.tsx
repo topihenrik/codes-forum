@@ -353,7 +353,6 @@ function AccountDeleteModal({ open, setOpen }: AccountDeleteModalProps) {
   const client = useApolloClient();
   const navigate = useNavigate();
 
-
   // Handle notification change
   useEffect(() => {
     const timeid = setTimeout(() => { setNotification(null); }, 5000);
