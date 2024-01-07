@@ -9,8 +9,8 @@ const users = [
     updatedAt: 1677945307432,
     __v: 0,
     avatar: {
-      url: 'http://res.cloudinary.com/dqcnxy51g/image/upload/v1677849677/codes-forum/hbi0km7azggyirzix3zc.webp',
-      public_id: 'codes-forum/hbi0km7azggyirzix3zc',
+      url: 'https://res.cloudinary.com/dqcnxy51g/image/upload/v1704645664/dev-codes-forum/man3_qaxdjk.webp',
+      public_id: 'dontdeletedevimages',
     },
   },
   {
@@ -18,8 +18,8 @@ const users = [
     username: 'martta95',
     password: '$2a$10$1up39YZGydEy6/Rxw0Pun.3pU22SlJz6jaxsUUgxIEbs1j8hEJJny',
     avatar: {
-      url: 'http://res.cloudinary.com/dqcnxy51g/image/upload/v1677849989/codes-forum/fmqqz2cjz0jeszfkerwa.webp',
-      public_id: 'codes-forum/fmqqz2cjz0jeszfkerwa',
+      url: 'https://res.cloudinary.com/dqcnxy51g/image/upload/v1704645664/dev-codes-forum/woman1_m3lpc6.webp',
+      public_id: 'dontdeletedevimages',
     },
     bio: "Hey, I'm here to help people!",
     admin: false,
@@ -32,8 +32,8 @@ const users = [
     username: 'pertsa92',
     password: '$2a$10$Kw40N59fexpQMvifXrQ9/eS9jTUJod1dkc.DzMnBXdnlfdh8fzJtq',
     avatar: {
-      url: 'http://res.cloudinary.com/dqcnxy51g/image/upload/v1677850284/codes-forum/iubgh5qlxw5roicbfjw2.webp',
-      public_id: 'codes-forum/iubgh5qlxw5roicbfjw2',
+      url: 'https://res.cloudinary.com/dqcnxy51g/image/upload/v1704645663/dev-codes-forum/man2_af1hwz.webp',
+      public_id: 'dontdeletedevimages',
     },
     bio: 'Welcome to my profile. I hope I can help you.',
     admin: false,
@@ -46,8 +46,8 @@ const users = [
     username: 'jukka87',
     password: '$2a$10$9NtEG/dkPHIgb6D8bDevnO0yG98KEcZUoH7XAfxEsigi3rwU62r2q',
     avatar: {
-      url: 'http://res.cloudinary.com/dqcnxy51g/image/upload/v1678019369/codes-forum/dv3m6zneg4xcsnwrsinm.webp',
-      public_id: 'codes-forum/dv3m6zneg4xcsnwrsinm',
+      url: 'https://res.cloudinary.com/dqcnxy51g/image/upload/v1704645663/dev-codes-forum/man1_gxhx2x.webp',
+      public_id: 'dontdeletedevimages',
     },
     bio: "I'm a software developer",
     admin: false,
