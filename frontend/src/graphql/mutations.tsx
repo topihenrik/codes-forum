@@ -55,6 +55,15 @@ export const LOGIN_USER = gql(/* GraphQL */`
   }
 `);
 
+export const DELETE_USER = gql(`
+  mutation deleteUser($username: String!, $password: String!) {
+    deleteUser(
+      username: $username
+      password: $password
+    )
+  }
+`);
+
 export const CREATE_POST = gql(/* GraphQL */`
   mutation createPost($title: String!, $body: String!, $tags: [String]!) {
     createPost(
@@ -116,6 +125,14 @@ export const VOTE_POST = gql(/* GraphQL */`
   }
 `);
 
+export const DELETE_POST = gql(`
+  mutation deletePost($_id: String!) {
+    deletePost(
+      _id: $_id
+    )
+  }
+`);
+
 export const CREATE_COMMENT = gql(/* GraphQL */`
   mutation createComment($body: String!, $post: String!) {
     createComment(
@@ -166,5 +183,13 @@ export const VOTE_COMMENT = gql(/* GraphQL */`
       voteCount
       voteStatus
     }
+  }
+`);
+
+export const DELETE_COMMENT = gql(`
+  mutation deleteComment($_id: String!) {
+    deleteComment(
+      _id: $_id
+    )
   }
 `);

@@ -18,7 +18,7 @@ import { Vote, type Comment } from '../__generated__/graphql';
 import { decodedTokenVar } from '../config/cache';
 import DraftEditor from './DraftEditor';
 import {
-  CREATE_COMMENT, EDIT_COMMENT, VOTE_COMMENT, VOTE_POST,
+  CREATE_COMMENT, DELETE_COMMENT, DELETE_POST, EDIT_COMMENT, VOTE_COMMENT, VOTE_POST,
 } from '../graphql/mutations';
 import Notification from './Notification';
 import Voting from './Voting';
@@ -33,6 +33,17 @@ function FullPost() {
     },
   });
   const [votePost] = useMutation(VOTE_POST);
+  const [deletePost] = useMutation(DELETE_POST);
+
+  const handlePostDelete = async () => {
+    try {
+      await deletePost({ variables: { _id: postId || '' } });
+      navigate('/', { replace: true });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  };
 
   // Loading is complete and a post was not found -> Post 404
   if (!result.loading && (!(result?.data?.post))) {
@@ -149,10 +160,14 @@ function FullPost() {
                   <EditIcon sx={{ width: '24px', height: '24px' }} />
                 </Link>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Typography sx={{ fontSize: '0.8rem' }}>
-                    Delete
-                    {' '}
-                  </Typography>
+                  <ButtonBase
+                    onClick={handlePostDelete}
+                  >
+                    <Typography sx={{ fontSize: '0.8rem' }}>
+                      Delete
+                      {' '}
+                    </Typography>
+                  </ButtonBase>
                   <DeleteIcon sx={{ width: '24px', height: '24px' }} />
                 </Box>
               </Box>
@@ -348,15 +363,33 @@ interface IFullCommentProps {
 }
 
 function FullComment({ comment }: IFullCommentProps) {
+  const postid = useParams().id || '';
   const [editing, setEditing] = useState(false);
   const decodedToken = useReactiveVar(decodedTokenVar);
   const cleanBody = comment.body ? DOMPurify.sanitize(draftToHtml(JSON.parse(comment.body))) : '';
 
   const [voteComment] = useMutation(VOTE_COMMENT);
+  const [deleteComment] = useMutation(
+    DELETE_COMMENT,
+    {
+      refetchQueries: [
+        { query: GET_COMMENTS, variables: { post: postid } },
+      ],
+    },
+  );
 
   const handleVoteSubmit = async (voteStatus: Vote) => {
     try {
       await voteComment({ variables: { _id: comment._id || '', voteStatus } });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  };
+
+  const handleCommentDelete = async () => {
+    try {
+      await deleteComment({ variables: { _id: comment._id || '' } });
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
@@ -416,11 +449,15 @@ function FullComment({ comment }: IFullCommentProps) {
                 </ButtonBase>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography sx={{ fontSize: '0.8rem' }}>
-                  Delete
-                  {' '}
-                </Typography>
-                <DeleteIcon sx={{ width: '24px', height: '24px' }} />
+                <ButtonBase
+                  onClick={handleCommentDelete}
+                >
+                  <Typography sx={{ fontSize: '0.8rem' }}>
+                    Delete
+                    {' '}
+                  </Typography>
+                  <DeleteIcon sx={{ width: '24px', height: '24px' }} />
+                </ButtonBase>
               </Box>
             </Box>
           )}

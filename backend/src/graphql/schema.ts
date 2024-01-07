@@ -4,6 +4,7 @@ const typeDefs = gql`
     scalar DateTime
     scalar Upload
     scalar ObjectID
+    scalar Void
 
     enum Vote {
         NONE
@@ -92,6 +93,10 @@ const typeDefs = gql`
             username: String!
             password: String!
         ): Token
+        deleteUser(
+          username: String!
+          password: String!
+        ): Void
         createPost(
             title: String!
             body: String!
@@ -107,6 +112,9 @@ const typeDefs = gql`
             _id: String!
             voteStatus: Vote!
         ): Post
+        deletePost(
+          _id: String!
+        ): Void
         createComment(
             body: String!
             post: String!
@@ -119,6 +127,9 @@ const typeDefs = gql`
             _id: String!
             voteStatus: Vote!
         ): Comment
+        deleteComment(
+          _id: String!
+        ): Void
     }
 `;
 

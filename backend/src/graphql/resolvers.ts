@@ -12,6 +12,7 @@ import Post from '../models/post.js';
 import Comment from '../models/comment.js';
 import { IToken } from '../types';
 import { uploadImage, destroyImage } from '../cloudinary.js';
+import cloudinary from "cloudinary";
 
 const resolvers: Resolvers = {
   DateTime: DateTimeResolver,
@@ -210,6 +211,56 @@ const resolvers: Resolvers = {
 
       return { value: jwt.sign(token, config.JWT_SECRET) };
     },
+    deleteUser: async (root, args, context) => {
+      if (!context.currentUser) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const user = await User.findById(context.currentUser._id);
+
+      if (!user) {
+        throw new GraphQLError('user doesn\'t exist', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      // Incorrect username OR Incorrect password
+      if (!(await bcrypt.compare(args.password, user.password))) {
+        throw new GraphQLError('incorrect credentials', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      // find user's all posts
+      const posts = await Post.find({ author: context.currentUser._id });
+
+      await Promise.all(
+        posts.map(async (post) => {
+          // find all comments from user's posts
+          const postComments = await Comment.find({ post: post._id });
+          return Promise.all(
+            // delete comments from the user's posts
+            postComments.map(async (comment) => Comment.findByIdAndDelete(comment._id)),
+          );
+        }),
+      );
+
+      await Promise.all(
+        // delete user's posts
+        posts.map(async (post) => Post.findByIdAndDelete(post._id)),
+      );
+
+      // find user's all comments
+      const userComments = await Comment.find({ author: context.currentUser._id });
+      await Promise.all(
+        // delete user's all comments
+        userComments.map(async (comment) => Comment.findByIdAndDelete(comment._id)),
+      );
+
+      // delete user's non-default avatar photo
+      if (user.avatar.public_id) {
+        await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+      }
+
+      // delete the user
+      await User.findByIdAndDelete(context.currentUser._id);
+    },
     createPost: async (root, args, context) => {
       if (!context.currentUser) {
         throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
@@ -302,6 +353,24 @@ const resolvers: Resolvers = {
       }
       return null;
     },
+    deletePost: async (root, args, context) => {
+      if (!context.currentUser) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const post = await Post.findById(args._id);
+
+      if (!post) {
+        throw new GraphQLError('post doesn\'t exist', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      if (post.author.toString() !== context.currentUser._id.toString()) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      await Comment.deleteMany({ post: args._id });
+      await Post.findByIdAndDelete(args._id);
+    },
     createComment: async (root, args, context) => {
       if (!context.currentUser) {
         throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
@@ -390,6 +459,23 @@ const resolvers: Resolvers = {
         return null;
       }
       return null;
+    },
+    deleteComment: async (root, args, context) => {
+      if (!context.currentUser) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const comment = await Comment.findById(args._id);
+
+      if (!comment) {
+        throw new GraphQLError('comment doesn\'t exist', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      if (comment.author.toString() !== context.currentUser._id.toString()) {
+        throw new GraphQLError('not authorized', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      await Comment.findByIdAndDelete(args._id);
     },
   },
 };

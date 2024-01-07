@@ -1,17 +1,17 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ContentLoader from 'react-content-loader';
 import {
-  Box, Button, Container, Typography, Paper, TextField, Avatar, Link,
+  Box, Button, Container, Typography, Paper, TextField, Avatar, Link, Modal,
 } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import {
-  ServerError, useMutation, useQuery, useReactiveVar,
+  ServerError, useApolloClient, useMutation, useQuery, useReactiveVar,
 } from '@apollo/client';
 import { decodedTokenVar } from '../config/cache';
 import { GET_ACCOUNT } from '../graphql/queries';
 import { AccountQuery } from '../__generated__/graphql';
-import { EDIT_BASIC_USER, EDIT_PASSWORD_USER } from '../graphql/mutations';
+import { DELETE_USER, EDIT_BASIC_USER, EDIT_PASSWORD_USER } from '../graphql/mutations';
 import Notification from './Notification';
 
 interface BasicInfoFormProps {
@@ -340,8 +340,128 @@ function PasswordInfoForm({ loading }: PasswordInfoFormProps) {
   );
 }
 
+interface AccountDeleteModalProps {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+function AccountDeleteModal({ open, setOpen }: AccountDeleteModalProps) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [notification, setNotification] = useState<INotification | null>(null);
+  const [deleteUser, deleteResult] = useMutation(DELETE_USER);
+  const client = useApolloClient();
+  const navigate = useNavigate();
+
+
+  // Handle notification change
+  useEffect(() => {
+    const timeid = setTimeout(() => { setNotification(null); }, 5000);
+    return () => { clearTimeout(timeid); };
+  }, [notification]);
+
+  // Delete failed -> Inform user about issues
+  useEffect(() => {
+    if (deleteResult.error) {
+      setNotification({ message: deleteResult.error.message, type: 'error' });
+    }
+  }, [deleteResult.error]);
+
+  const handleUserDelete = async (event: React.FormEvent) => {
+    try {
+      event.preventDefault();
+      await deleteUser({ variables: { username, password } });
+
+      decodedTokenVar(null);
+      localStorage.clear();
+      await client.resetStore();
+      navigate('/');
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  };
+
+  return (
+    <Modal
+      open={open}
+      onClose={() => { setOpen(false); }}
+    >
+      <Paper sx={{
+        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+      }}
+      >
+        <Paper sx={{
+          backgroundColor: 'primary.dark', borderBottomLeftRadius: '0', borderBottomRightRadius: '0', padding: '8px',
+        }}
+        >
+          <Typography
+            variant='h4'
+            sx={{ textAlign: 'center' }}
+          >
+            Account Deletion
+          </Typography>
+        </Paper>
+        <Box sx={{
+          display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px',
+        }}
+        >
+          <Typography>
+            Are you sure you want to delete your account?
+            All your posts and comments will also be deleted.
+            Type your credentials to confirm this action.
+          </Typography>
+          <Box
+            component='form'
+            onSubmit={handleUserDelete}
+            sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+          >
+            <TextField
+              id='input-username'
+              type='text'
+              label='Username'
+              value={username}
+              onChange={(event) => { setUsername(event.target.value); }}
+            />
+            <TextField
+              id='input-password'
+              type='password'
+              label='Password'
+              value={password}
+              onChange={(event) => { setPassword(event.target.value); }}
+            />
+            {notification && (
+              <Notification
+                message={notification.message}
+                type={notification.type}
+              />
+            )}
+            <Button
+              id='btn-delete'
+              variant='contained'
+              color='error'
+              type='submit'
+              disabled={deleteResult.loading}
+            >
+              Delete Account
+            </Button>
+            <Button
+              id='btn-delete'
+              variant='outlined'
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </Box>
+      </Paper>
+    </Modal>
+  );
+}
+
 function AccountPage() {
   const result = useQuery(GET_ACCOUNT);
+  const [open, setOpen] = useState(false);
 
   return (
     <Container sx={{
@@ -424,7 +544,19 @@ function AccountPage() {
         <PasswordInfoForm
           loading={result.loading}
         />
+        <Button
+          id='btn-update-password'
+          color='error'
+          variant='contained'
+          onClick={() => setOpen(true)}
+        >
+          Delete Account
+        </Button>
       </Box>
+      <AccountDeleteModal
+        open={open}
+        setOpen={setOpen}
+      />
     </Container>
   );
 }
