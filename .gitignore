@@ -3,6 +3,7 @@ build
 .env*
 __generated__
 .vscode
+.idea
 
 # cypress
 videos

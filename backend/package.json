@@ -8,6 +8,7 @@
     "start:e2e": "cross-env NODE_ENV=test node ./build/index.js",
     "build": "graphql-codegen --config codegen.yml && tsc",
     "dev": "concurrently  --names \"CodeGen,TS,Nodemon\" -c \"bgYellow.black,bgBlue.black,bgMagenta.black\" \"graphql-codegen --watch './src/**/*.ts'\"  \"tsc -w \" \"cross-env NODE_ENV=development nodemon ./build/index.js \"",
+    "init-dev-db": "cross-env NODE_ENV=development node ./build/tests/initialize-db.js",
     "lint": "eslint ."
   },
   "keywords": [],
